@@ -1,0 +1,1 @@
+Pontyfikat.cs - to mnie rozwalilo
