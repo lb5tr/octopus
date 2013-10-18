@@ -5,5 +5,6 @@
         :hu.dwim.def
         :alexandria
         :bordeaux-threads
-        :anaphora))
+        :anaphora)
+  (:export :start-octopus-server))
 

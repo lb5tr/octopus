@@ -7,18 +7,18 @@
   ())
 
 (defmethod resource-client-connected ((res octopus-resource) client)
-  (format t "got connection on octopus server from ~s : ~s~%" (client-host client) (client-port client))
+  (format t "[client connected on octopus server from ~s : ~s]~%" (client-host client) (client-port client))
   t)
 
 (defmethod resource-client-disconnected ((resource octopus-resource) client)
-  (format t "Client disconnected from resource ~A: ~A~%" resource client))
+  (format t "[client disconnected from resource ~A]~%" resource))
 
 (defmethod resource-received-text ((res octopus-resource) client message)
-  (format t "got frame ~s from client ~s" message client)
+  (format t "[got frame ~s... from client ~s]~%" (subseq message 0 10) client)
   (write-to-client-text client message))
 
 (defmethod resource-received-binary((res octopus-resource) client message)
-  (format t "got binary frame ~s from client ~s" (length message) client)
+  (format t "[got binary frame len: ~s]~%" (length message) client)
   (write-to-client-binary client message))
 
 (defun register-octopus-resource ()
