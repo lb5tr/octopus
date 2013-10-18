@@ -14,6 +14,7 @@
     (:clws :hu.dwim.defclass-star+hu.dwim.def :cl-json :alexandria)
     :serial t
     :components ((:file "package")
+		 (:file "settings")
                  (:file "utils")
                  (:file "server")
                  (:file "octopus")))
