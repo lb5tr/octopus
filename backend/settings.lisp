@@ -13,3 +13,8 @@
 (defparameter *log-sender-name* 'octopus-log)
 (defparameter *log-location* "./octopus.log")
 
+;database
+(defparameter *database-host* "localhost")
+(defparameter *database-user* "octopus")
+(defparameter *database-name* "octopus")
+(defparameter *database-password* nil)

@@ -13,6 +13,7 @@
     :depends-on
     (:clws
      :hu.dwim.defclass-star+hu.dwim.def
+     :hu.dwim.perec.postgresql
      :cl-json
      :log5
      :alexandria)
@@ -20,6 +21,7 @@
     :components ((:file "package")
                  (:file "settings")
                  (:file "utils")
+                 (:file "database")
                  (:file "log")
                  (:file "server")
                  (:file "octopus")))
