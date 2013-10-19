@@ -11,7 +11,3 @@
       :database ,*database-name*
       :user-name ,*database-user*
       :password  ,*database-password*)))
-
-(defpclass* user ()
-  ((username :type (text 256))
-   (password-hash :type (text 256))))
