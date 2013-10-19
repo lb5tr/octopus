@@ -7,18 +7,18 @@
   ())
 
 (defmethod resource-client-connected ((res octopus-resource) client)
-  (format t "[client connected on octopus server from ~s : ~s]~%" (client-host client) (client-port client))
+  (log-as info "client connected on octopus server from ~s : ~s" (client-host client) (client-port client))
   t)
 
 (defmethod resource-client-disconnected ((resource octopus-resource) client)
-  (format t "[client disconnected from resource ~A]~%" resource))
+  (log-as :info "client disconnected from resource ~A" resource))
 
 (defmethod resource-received-text ((res octopus-resource) client message)
-  (format t "[got frame ~s... from client ~s]~%" (subseq message 0 10) client)
+  (log-as info "got frame ~s... from client ~s" (subseq message 0 10) client)
   (write-to-client-text client message))
 
 (defmethod resource-received-binary((res octopus-resource) client message)
-  (format t "[got binary frame len: ~s]~%" (length message) client)
+  (log-as info "got binary frame len: ~s" (length message) client)
   (write-to-client-binary client message))
 
 (defun register-octopus-resource ()
@@ -27,9 +27,14 @@
                           (apply 'origin-prefix *resource-origin-prefixes*)))
 
 (defun start-octopus-server ()
+  (initialize)
   (register-octopus-resource)
   (start-websocket-server)
   (start-resource-listener))
+
+(defun initialize ()
+  ;put here initialization of all components
+  (initialize-log))
 
 (defun start-websocket-server ()
   (setf *server-thread* (bordeaux-threads:make-thread (lambda ()

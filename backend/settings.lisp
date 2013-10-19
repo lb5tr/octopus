@@ -8,3 +8,8 @@
 (defparameter *resource-listener-name* "octopus api")
 (defparameter *server-thread-name* "octopus server thread")
 (defparameter *resource-origin-prefixes* '(""))
+
+;log options
+(defparameter *log-sender-name* 'octopus-log)
+(defparameter *log-location* "./octopus.log")
+

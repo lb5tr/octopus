@@ -12,6 +12,7 @@ def basic_test():
      
      for i in range(1,hit_factor):
               ws.send(load_string)
+              ws.recv()
 
      now = datetime.datetime.now()
      print "* [Done]"
@@ -19,7 +20,7 @@ def basic_test():
 
      print "* [Took {0}s]".format(delta.total_seconds())
      print "* [Sent {0}kB]".format(hit_factor * len(load_string) / 1000)
-     print "* [Throughtput {0}kBps]".format(hit_factor/delta.total_seconds())
+     print "* [Throughtput {0}kBps]".format(hit_factor*2/delta.total_seconds())
 
      ws.close()
 
