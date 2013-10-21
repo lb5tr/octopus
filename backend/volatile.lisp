@@ -9,5 +9,6 @@
   ((name nil :type string)
    (users (make-hash-table) :type hash-table)
    (current-map nil :type string)
-   (creation-time (get-universal-time) :type date)))
+   (creation-time (get-universal-time) :type date)
+   (worker nil)))
 
