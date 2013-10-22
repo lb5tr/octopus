@@ -3,7 +3,7 @@
   Serwer przyjmuje rządania od klientów i odpowiada.
   Rządania są zapisane jako prosty obiekt JSON:
 
-  > {type : string, payload : value}
+  > {user-id: string, type : string, payload : value}
 
   Serwer również odpowiada korzystająć z JSON
 
@@ -28,6 +28,15 @@
 
 
 ## Komendy użytkownika dla channel-managera
+
+### login
+  
+  Komenda sluży do logowania na serwerze, jako jedyna ignoruje user-id:
+
+  >> {type: "login", payload: {user-name: "string", password: "sha1 hash"}}
+
+  Serwer zwraca "OK" gdzie payload będzie stringiem z unikalnym dla tej sesji user-id
+  lub "ERROR".
 
 ### list
 
