@@ -1,14 +1,22 @@
 (in-package :octopus)
 
+(def class* dummy ()
+  ())
+
 (def class* client-message ()
-  ((connection-id nil :type string)
+  ((user-id nil :type string)
    (message-type "undefined" :type string)
    (payload nil)))
 
 (def class* channel ()
   ((name nil :type string)
+   (channel-locator nil :type string)
    (users (make-hash-table) :type hash-table)
-   (current-map nil :type string)
+   (map nil :type string)
+   (capacity 0 :type integer)
+   (players-count 0 :type integer)
+   (password-hash nil :type string)
+   (protected nil :type boolean)
    (creation-time (get-universal-time) :type date)
    (worker nil)))
 
@@ -21,7 +29,7 @@
   t)
 
 (defmethod resource-client-disconnected ((resource channel-manager-resource) client)
-  (log-as :info "client disconnected from resource ~A" resource))
+  (log-as info "client disconnected from resource ~A" resource))
 
 (defmethod resource-received-text ((res channel-manager-resource) client message)
   (log-as info "got frame ~s... from client ~s" (subseq message 0 10) client)

@@ -23,8 +23,8 @@
                  (:file "utils")
                  (:file "database")
                  (:file "persistent" :depends-on ("database"))
-                 (:file "volatile")
                  (:file "log")
+                 (:file "volatile")
                  (:file "server")
                  (:file "octopus")))
 

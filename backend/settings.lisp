@@ -22,3 +22,15 @@
 (defparameter *database-user* "octopus")
 (defparameter *database-name* "octopus")
 (defparameter *database-password* nil)
+
+;client message mapping
+(defparameter *message-type-alist*
+  '(("undefined" . 'undefined)
+    ("list" . 'list-channels)
+    ("create" . 'create-channel)))
+
+;message to payload type
+(defparameter *message-payload-alist*
+  '(('undefined . dummy)
+    ('list-channels . dummy)
+    ('create-channel . channel)))
