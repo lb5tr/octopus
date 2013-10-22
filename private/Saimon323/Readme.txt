@@ -1,1 +1,1 @@
-Jeœli dotar³o to daj znaæ :)
+kuba poprawil kodowanie
