@@ -1,5 +1,28 @@
 (in-package :octopus)
 
+(defun undefined (payload uid) "undef")
+
+(defun login (payload uid) "login")
+
+(defun list-channels (payload uid) "list")
+
+(defun create-channel (payload uid) "create")
+
+;client message mapping
+(defparameter *message-type-alist*
+  `(("undefined" . ,#'undefined)
+    ("login" . ,#'login)
+    ("list" . ,#'list-channels)
+    ("create" . ,#'create-channel)))
+
+;message to payload type
+(defparameter *message-payload-alist*
+  `((,#'login . user-v)
+    (,#'undefined . dummy)
+    (,#'list-channels . dummy)
+    (,#'create-channel . channel)))
+
+
 (defun json-to-client-message (json)
   (let* ((alist (decode-json-from-string json))
          (msg-type-string (assoc-cdr :type alist))
@@ -14,4 +37,11 @@
                       :message-type msg-class
                       :user-id user-id
                       :payload (apply #'make-instance payload-class                           (alist-plist (assoc-cdr :payload alist)))))))
+
+(defun dispatch-message (client-msg)
+  (let ((msg-function (message-type-of client-msg))
+	(payload (payload-of client-msg))
+	(user-id (user-id-of client-msg)))
+    (log-as info "dispatching ~A" msg-function)
+    (funcall msg-function payload user-id)))
 

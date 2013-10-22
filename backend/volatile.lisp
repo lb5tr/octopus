@@ -3,6 +3,10 @@
 (def class* dummy ()
   ())
 
+(def class* user-v ()
+  ((username nil :type string)
+   (password-hash nil :type string)))
+
 (def class* client-message ()
   ((user-id nil :type string)
    (message-type "undefined" :type string)
@@ -33,7 +37,7 @@
 
 (defmethod resource-received-text ((res channel-manager-resource) client message)
   (log-as info "got frame ~s... from client ~s" (subseq message 0 10) client)
-  (write-to-client-text client message))
+  (write-to-client-text client (dispatch-message (json-to-client-message message))))
 
 (defmethod resource-received-binary((res channel-manager-resource) client message)
   (log-as info "got binary frame len: ~s" (length message) client)
