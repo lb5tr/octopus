@@ -36,7 +36,8 @@
        (make-instance 'client-message
                       :message-type msg-class
                       :user-id user-id
-                      :payload (apply #'make-instance payload-class                           (alist-plist (assoc-cdr :payload alist)))))))
+                      :payload (apply #'make-instance payload-class
+				      (alist-plist (assoc-cdr :payload alist)))))))
 
 (defun dispatch-message (client-msg)
   (let ((msg-function (message-type-of client-msg))
