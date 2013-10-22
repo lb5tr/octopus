@@ -33,7 +33,7 @@
   
   Komenda sluży do logowania na serwerze, jako jedyna ignoruje user-id:
 
-  >> {type: "login", payload: {user-name: "string", password: "sha1 hash"}}
+  > {type: "login", payload: {user-name: "string", password: "sha1 hash"}}
 
   Serwer zwraca "OK" gdzie payload będzie stringiem z unikalnym dla tej sesji user-id
   lub "ERROR".
