@@ -15,6 +15,7 @@
      :hu.dwim.defclass-star+hu.dwim.def
      :hu.dwim.perec.postgresql
      :cl-json
+     :ironclad
      :log5
      :alexandria)
     :serial t

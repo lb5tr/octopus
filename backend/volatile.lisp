@@ -7,6 +7,10 @@
   ((username nil :type string)
    (password-hash nil :type string)))
 
+(def class* server-message ()
+  ((message-type nil :type string)
+   (payload nil)))
+
 (def class* client-message ()
   ((user-id nil :type string)
    (message-type "undefined" :type string)

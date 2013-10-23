@@ -5,9 +5,10 @@
         :log5
         :hu.dwim.def
         :hu.dwim.perec
+        :ironclad
         :alexandria
         :bordeaux-threads
         :anaphora)
   (:export :start-octopus-server)
-  (:shadowing-import-from :hu.dwim.perec :set :time))
+  (:shadowing-import-from :hu.dwim.perec :set :time :null))
 

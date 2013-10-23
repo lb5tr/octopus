@@ -15,7 +15,7 @@
 
 ;log options
 (defparameter *log-sender-name* 'octopus-log)
-(defparameter *log-location* "./octopus.log")
+(defparameter *log-location* *standard-output*)
 
 ;database options
 (defparameter *database-host* "localhost")
@@ -23,3 +23,10 @@
 (defparameter *database-name* "octopus")
 (defparameter *database-password* nil)
 
+;server error codes with descriptions
+(defparameter *error-codes*
+  '((0 . "No such user")))
+
+;others
+(defparameter *uid* nil)
+(defparameter *default-digest* 'sha1)

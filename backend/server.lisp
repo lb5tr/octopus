@@ -22,7 +22,8 @@
 
 (defun initialize ()
   ;put here initialization of all components
-  (initialize-log))
+  (initialize-log)
+  (initialize-uid-generator))
 
 (defun register-websocket-resource (path prefixes resource-class)
   (register-global-resource path

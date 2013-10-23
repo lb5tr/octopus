@@ -2,11 +2,33 @@
 
 (defun undefined (payload uid) "undef")
 
-(defun login (payload uid) "login")
+(defun login (user-data uid)
+  (let ((user (with-transaction
+		(select-instance (u user)
+		  (where (and
+			  (string= (username-of u)
+				   (username-of user-data))
+			  (string= (password-hash-of u)
+				   (password-hash-of user-data))))))))
+    (if (equal user nil)
+	(response-with :message-type :error
+		       :error-code 0)
+	(response-with :message-type :ok
+		       :payload (next-random-uid)))))
 
 (defun list-channels (payload uid) "list")
 
 (defun create-channel (payload uid) "create")
+
+(defun response-with (&key message-type (payload nil) (error-code -1))
+  (encode-json-to-string
+   (if (eq message-type :ok)
+       (make-instance 'server-message
+		      :message-type message-type
+		      :payload payload)
+       (make-instance 'server-message
+		      :message-type message-type
+		      :payload `((,error-code . ,(assoc-cdr error-code *error-codes*)))))))
 
 ;client message mapping
 (defparameter *message-type-alist*
@@ -22,6 +44,11 @@
     (,#'list-channels . dummy)
     (,#'create-channel . channel)))
 
+(defun initialize-uid-generator ()
+  (setf *uid* (random-string)))
+
+(defun next-random-uid ()
+  (setf *uid* (hash-string *uid* :digest *default-digest*)))
 
 (defun json-to-client-message (json)
   (let* ((alist (decode-json-from-string json))
