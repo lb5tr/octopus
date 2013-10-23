@@ -28,7 +28,10 @@
 		      :payload payload)
        (make-instance 'server-message
 		      :message-type message-type
-		      :payload `((,error-code . ,(assoc-cdr error-code *error-codes*)))))))
+		      :payload (make-instance 'error-payload
+					      :error-code error-code
+					      :error-description (assoc-cdr error-code
+									    *error-codes*))))))
 
 ;client message mapping
 (defparameter *message-type-alist*

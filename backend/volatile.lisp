@@ -28,6 +28,10 @@
    (creation-time (get-universal-time) :type date)
    (worker nil)))
 
+(def class* error-payload ()
+  ((error-code nil :type integer)
+   (error-description nil :type string)))
+
 ;channel manager resource
 (def class* channel-manager-resource (ws-resource)
   ())
@@ -40,7 +44,7 @@
   (log-as info "client disconnected from resource ~A" resource))
 
 (defmethod resource-received-text ((res channel-manager-resource) client message)
-  (log-as info "got frame ~s... from client ~s" (subseq message 0 10) client)
+  (log-as info "got frame ~s... from client ~s" message client)
   (write-to-client-text client (dispatch-message (json-to-client-message message))))
 
 (defmethod resource-received-binary((res channel-manager-resource) client message)
