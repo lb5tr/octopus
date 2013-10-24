@@ -28,5 +28,7 @@
   '((0 . "No such user")))
 
 ;others
-(defparameter *uid* nil)
 (defparameter *default-digest* 'sha1)
+(defparameter *new-uid* (let ((uuid (random-string)))
+			  (lambda ()
+			    (setf uuid (hash-string uuid :digest *default-digest*)))))

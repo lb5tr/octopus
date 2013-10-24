@@ -14,7 +14,7 @@
 	(response-with :message-type :error
 		       :error-code 0)
 	(response-with :message-type :ok
-		       :payload (next-random-uid)))))
+		       :payload (funcall *new-uid*)))))
 
 (defun list-channels (payload uid) "list")
 
@@ -46,12 +46,6 @@
     (,#'undefined . dummy)
     (,#'list-channels . dummy)
     (,#'create-channel . channel)))
-
-(defun initialize-uid-generator ()
-  (setf *uid* (random-string)))
-
-(defun next-random-uid ()
-  (setf *uid* (hash-string *uid* :digest *default-digest*)))
 
 (defun json-to-client-message (json)
   (let* ((alist (decode-json-from-string json))

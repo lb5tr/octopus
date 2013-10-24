@@ -20,8 +20,8 @@
      :alexandria)
     :serial t
     :components ((:file "package")
-                 (:file "settings")
                  (:file "utils")
+                 (:file "settings")
                  (:file "database")
                  (:file "persistent" :depends-on ("database"))
                  (:file "log")
