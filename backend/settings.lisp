@@ -25,7 +25,9 @@
 
 ;server error codes with descriptions
 (defparameter *error-codes*
-  '((0 . "No such user")))
+  '((unknown . -1)
+    (no-such-user . 0)
+    (user-already-logged-in . 1)))
 
 ;others
 (defparameter *default-digest* 'sha1)

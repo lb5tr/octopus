@@ -11,10 +11,8 @@
                                            *channel-manager-resource-listener-name*)))
 
 (defun kill-octopus-server ()
-  (bordeaux-threads:destroy-thread *server-thread*)
   (bordeaux-threads:destroy-thread *channel-manager-resource-thread*)
-  (setf *server-thread* nil
-        *channel-manager-resource-thread* nil))
+  (bordeaux-threads:destroy-thread *server-thread*))
 
 (defun restart-octopus-server ()
   (kill-octopus-server)

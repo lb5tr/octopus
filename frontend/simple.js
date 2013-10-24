@@ -28,7 +28,7 @@ function login(username, password)
     };
 
     msg = {
-        type : 'login',
+        messageType : 'login',
         payload : user
     };
 

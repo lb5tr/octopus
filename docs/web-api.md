@@ -3,15 +3,15 @@
   Serwer przyjmuje rządania od klientów i odpowiada.
   Rządania są zapisane jako prosty obiekt JSON:
 
-  > {user-id: string, type : string, payload : value}
+  > {user-id: string, messageType : string, payload : value}
 
   Serwer również odpowiada korzystająć z JSON
 
-  > {type: string, payload: value}
+  > {messageType: string, payload: value}
 
-  Jeżeli type będzie równe "OK" to należy przejsć to przetwarzania
+  Jeżeli messageType będzie równe "OK" to należy przejsć to przetwarzania
   danych z payload (rządanie się powiodło). Jeżeli coś poszło nie tak
-  to type będzie równie "ERROR" a payload będzie obiektem:
+  to messageType będzie równie "ERROR" a payload będzie obiektem:
 
   > {error-code: number, error-description: "string"}
   
@@ -33,14 +33,14 @@
   
   Komenda sluży do logowania na serwerze, jako jedyna ignoruje user-id:
 
-  > {type: "login", payload: {user-name: "string", password: "sha1 hash"}}
+  > {messageType: "login", payload: {user-name: "string", password: "sha1 hash"}}
 
   Serwer zwraca "OK" gdzie payload będzie stringiem z unikalnym dla tej sesji user-id
   lub "ERROR".
 
 ### list
 
-  > {type : "list",
+  > {messageType : "list",
   > payload : null}
   
   Serwer odpowiada tablicą obiektów zawierającą wszsytkie
@@ -71,7 +71,7 @@
 
 ### create
 
-  > { type: "create", payload: 
+  > { messageType: "create", payload: 
   > {
   >  name:"string", 
   >  map: "string", 
@@ -82,6 +82,6 @@
   > }
 
   Serwer odpowiada "OK" gdzie payload będzie URL nowego kanłu np:
-  > {type: "OK", payload: "ws://foo.bar:7878/123-123-432"}
+  > {messageType: "OK", payload: "ws://foo.bar:7878/123-123-432"}
  
   Lub "ERROR", kody błędów są opisanie w tablicy kodów błędów.
