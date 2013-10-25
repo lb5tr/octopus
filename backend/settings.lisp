@@ -27,7 +27,8 @@
 (defparameter *error-codes*
   '((unknown . -1)
     (no-such-user . 0)
-    (user-already-logged-in . 1)))
+    (user-already-logged-in . 1)
+    (no-such-uid . 2)))
 
 ;others
 (defparameter *default-digest* 'sha1)

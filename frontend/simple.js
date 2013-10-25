@@ -1,9 +1,14 @@
 var socket = null;
+var uid = null;
 
 $(document).ready(function ( ) {
     
     $('#login').click( function () {
         login($("#userName").val(), $("password").val());
+    });
+
+    $('#logout').click( function () {
+        logout(uid);
     });
 
     $('#connect').click( function () {
@@ -24,7 +29,7 @@ function login(username, password)
 {
     user = {
         username: $("#userName").val(),
-        passwordHash: CryptoJS.MD5($("#password").val()) + ''
+        passwordHash: CryptoJS.SHA1($("#password").val()) + ''
     };
 
     msg = {
@@ -41,10 +46,28 @@ function dispatch (data)
 
     if (obj.messageType == "ok")
     {
-        $("#log").html("Success! your id is " + obj.payload);
+        $("#log").html("Success! payload : " + obj.payload);
+        uid = obj.payload;
     }
     else
     {
         $("#log").html("Failed! </br>" + obj.payload.errorDescription);
     }   
+}
+
+function logout(uid)
+{
+
+    if (uid == null){
+        alert('Not loged in!');
+        return;
+    }
+
+    msg = {
+        messageType : 'logout',
+        uid: uid
+    };
+
+    uid = null;
+    socket.send(JSON.stringify(msg));
 }

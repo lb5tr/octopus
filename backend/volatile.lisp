@@ -5,14 +5,15 @@
 
 (def class* user-v ()
   ((username nil :type string)
-   (password-hash nil :type string)))
+   (password-hash nil :type string)
+   (uid nil :type string)))
 
 (def class* server-message ()
   ((message-type nil :type string)
    (payload nil)))
 
 (def class* client-message ()
-  ((user-id nil :type string)
+  ((uid nil :type string)
    (message-type "undefined" :type string)
    (payload nil)))
 
@@ -39,6 +40,13 @@
 
 (def method get-user ((srv server) value &key users-by)
   (gethash value (funcall users-by srv)))
+
+(def method rm-user ((srv server) value &key users-by)
+  (let ((user (get-user srv value :users-by users-by)))
+    (when (not (eq user nil))
+      (remhash (username-of user) (users-by-username-of srv))
+      (remhash (uid-of user) (users-by-uid-of srv))
+      t)))
 
 (def class* error-payload ()
   ((error-code nil :type integer)
