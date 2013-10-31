@@ -22,6 +22,7 @@
    (channel-locator nil :type string)
    (users (make-hash-table) :type hash-table)
    (map nil :type string)
+   (admin-id nil :type string)
    (capacity 0 :type integer)
    (players-count 0 :type integer)
    (password-hash nil :type string)

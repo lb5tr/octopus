@@ -46,18 +46,17 @@ function dispatch (data)
 
     if (obj.messageType == "ok")
     {
-        $("#log").html("Success! payload : " + obj.payload);
+        $("#log").html("Success!</br>Payload: " + obj.payload);
         uid = obj.payload;
     }
     else
     {
-        $("#log").html("Failed! </br>" + obj.payload.errorDescription);
+        $("#log").html("Failed!</br>Description: " + obj.payload.errorDescription);
     }   
 }
 
 function logout(uid)
 {
-
     if (uid == null){
         alert('Not loged in!');
         return;

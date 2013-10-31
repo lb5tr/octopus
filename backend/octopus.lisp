@@ -1,5 +1,11 @@
 (in-package :octopus)
 
+(def definer auth-handler (name (payload uid) &body body)
+  `(defun ,name (,payload ,uid)
+     (apply #'response-with (if (ensure-user-authenticated ,uid)
+	 (progn ,@body)
+	 '(:message-type :error :error-type user-not-authenticated)))))
+
 (defparameter *server* (make-instance 'server))
 
 (defun undefined-command (payload uid) "undef")
@@ -37,9 +43,17 @@
 	      (string= (password-hash-of u)
 		       (password-hash-of user-data)))))))
 
+(defun ensure-unique-channel (channel-name)
+  (not (gethash (channels-of *server*) channel-name)))
+
+(defun ensure-user-authenticated (uid)
+  (get-user *server* uid :users-by 'users-by-uid-of))
+
 (defun list-channels (payload uid) "list")
 
-(defun create-channel (channel-data uid) "create")
+(def auth-handler create-channel (channel-data uid)
+  (log-as info "create-channel ~A" channel-data)
+  '(:message-type :ok))
 
 (defun logout (payload uid)
   (if (rm-user *server* uid :users-by 'users-by-uid-of)
