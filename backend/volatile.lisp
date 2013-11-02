@@ -1,5 +1,11 @@
 (in-package :octopus)
 
+(def method sb-mop:validate-superclass ((self standard-class) s)
+  t)
+
+(def class* selective-serialization-class (standard-class)
+  ((ommit-when-serializing nil :reader ommit)))
+
 (def class* dummy ()
   ())
 
@@ -28,12 +34,29 @@
    (password-hash nil :type string)
    (protected nil :type boolean)
    (creation-time (get-universal-time) :type date)
-   (worker nil)))
+   (worker nil))
+  (:metaclass selective-serialization-class)
+  (:ommit-when-serializing password-hash admin-id))
+
+(def method cl-json:encode-json ((self channel) &optional stream)
+  (with-object (stream)
+    (map-slots-with-ommit (cl-json:stream-object-member-encoder stream) self)))
+
+(defun map-slots-with-ommit (function object)
+  (let ((om (ommit (class-of object))))
+    (loop for slot in (closer-mop:class-slots (class-of object))
+       for slot-name = (closer-mop:slot-definition-name slot)
+       if (and (slot-boundp object slot-name)
+               (not (member slot-name om)))
+       do (funcall function slot-name (slot-value object slot-name)))))
 
 (def class* server ()
   ((users-by-uid (make-hash-table :test #'equal) :type hash-table)
    (users-by-username (make-hash-table :test #'equal) :type hash-table)
    (channels (make-hash-table :test #'equal) :type hash-table)))
+
+(def method add-channel ((srv server) name channel-data)
+  (setf (gethash name (channels-of srv)) channel-data))
 
 (def method add-user ((srv server) uid user-data)
   (setf (gethash uid (users-by-uid-of srv)) user-data)
