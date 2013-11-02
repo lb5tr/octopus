@@ -50,8 +50,14 @@
 (defun ensure-user-authenticated (uid)
   (get-user *server* uid :users-by 'users-by-uid-of))
 
-(defun list-channels (payload uid) "list")
+(def auth-handler list-channels (payload uid)
+    `(:message-type :ok
+                    :payload ,(channels-of *server*)))
 
+;TODO
+;-empty channel name
+;-set protected slot if password-hash not null
+;-data sanitization
 (def auth-handler create-channel (channel-data uid)
   (let ((channel-name (name-of channel-data))
         (nuid (funcall *new-uid*)))
