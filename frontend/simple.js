@@ -5,23 +5,23 @@ var lastWas = null;
 $(document).ready(function ( ) {
     
     $('#login').click( function () {
-        lastWas = "login";
         login($("#userName").val(), $("password").val());
     });
 
     $('#logout').click( function () {
-        lastWas = "logout";
         logout(UID);
     });
 
     $('#connect').click( function () {
-        lastWas = "connect";
         initWebSockets();
     });
 
     $('#createChannel').click( function () {
-        lastWas = "createChannel";
         createChannel();
+    });
+
+    $('#listChannels').click( function () {
+        listChannels();
     });
 
 });
@@ -32,10 +32,13 @@ function initWebSockets()
     socket.onmessage = function (msg){
           dispatch(msg.data);
         };
+
+    $("#log").html("OK");
 }
 
 function createChannel()
 {
+    lastWas = "createChannel";
     msg = {
         messageType : "create",
         uid : UID,
@@ -54,6 +57,7 @@ function createChannel()
 
 function login(username, password)
 {
+    lastWas = "login";
     user = {
         username: $("#userName").val(),
         passwordHash: CryptoJS.SHA1($("#password").val()) + ''
@@ -73,15 +77,14 @@ function dispatch (data)
 
     if (obj.messageType == "ok")
     {
-        $("#log").html("Success!</br>Payload: " + obj.payload);
+        $("#log").html("Success!</br>");
         switch (lastWas)
         {
             case "login": afterLogin(obj.payload);break;
             case "createChannel": afterCreate(obj.payload);break;
-            case "logout": afterlogout(obj.payload); break;
+            case "logout": afterLogout(obj.payload); break;
+            case "listChannels": afterList(obj.payload); break;
         };
-
-        $("#createForm").css("display", "block");
     }
     else
     {
@@ -92,20 +95,25 @@ function dispatch (data)
 function afterLogout(p)
 {
     UID = null;
+    $("#loggedZone").css("display", "none");
 }
 
 function afterLogin(p)
 {
     UID = p;
+    $("#loggedZone").css("display", "block");
+    listChannels();
 }
 
 function afterCreate(p)
 {
     $("#log").html(JSON.stringify(p));
+    listChannels();
 }
 
 function logout(uid)
 {
+    lastWas = "logout";
     if (uid == null){
         alert('Not loged in!');
         return;
@@ -118,5 +126,25 @@ function logout(uid)
 
     uid = null;
     socket.send(JSON.stringify(msg));
-    $("#createForm").css("display", "none");
+}
+
+function listChannels()
+{
+    lastWas = "listChannels";
+
+    if (UID == null){
+        return;
+    }
+
+    msg = {messageType : "list", uid : UID};
+    socket.send(JSON.stringify(msg));
+}
+
+function afterList(channels)
+{
+    $("#channelsList").html("");
+    for (var key in channels)
+    {
+        $("#channelsList").append("<a href='"+channels[key].channelLocator+"'>"+channels[key].name+"</a></br>");
+    }
 }
