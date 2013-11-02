@@ -29,7 +29,9 @@
     (no-such-user . 0)
     (user-already-logged-in . 1)
     (no-such-uid . 2)
-    (user-not-authenticated . 3)))
+    (user-not-authenticated . 3)
+    (undefined-message-type . 4)
+    (channel-already-exisits . 5)))
 
 ;others
 (defparameter *default-digest* 'sha1)

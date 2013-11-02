@@ -16,6 +16,7 @@
      :hu.dwim.perec.postgresql
      :cl-json
      :ironclad
+     :closer-mop
      :log5
      :alexandria)
     :serial t
