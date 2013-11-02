@@ -43,7 +43,7 @@
   > {messageType : "list",
   > payload : null}
   
-  Serwer odpowiada tablicą obiektów zawierającą wszsytkie
+  Serwer odpowiada obiektem obiektów zawierającą wszsytkie
   istniejące na serwerze kanały. Obiekt opisujący kanał wygłada
   następująco:
 
@@ -56,7 +56,7 @@
   > }
 
   Przykładowa odpowiedź:
-  > [
+  > {
   >  {
   >    name: "foo",
   >    resource-locator: "ws://foo.pl:7878/1234-123-431",
@@ -65,7 +65,7 @@
   >    map: "warehouse",
   >    protected: false
   >  }
-  > ]
+  > }
 
   To żądanie nie zwraca błędów, co najwyżej pustą tablice kanałów.
 
