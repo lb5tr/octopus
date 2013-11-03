@@ -1,5 +1,18 @@
 (in-package :octopus)
 
+(defun map-slots-with-ommit (function object)
+  (let ((om (ommit (class-of object))))
+    (loop for slot in (closer-mop:class-slots (class-of object))
+       for slot-name = (closer-mop:slot-definition-name slot)
+       if (and (slot-boundp object slot-name)
+               (not (member slot-name om)))
+       do (funcall function slot-name (slot-value object slot-name)))))
+
+(def macro override-json-serialization (class-to-override)
+  `(def method cl-json:encode-json ((self ,class-to-override) &optional stream)
+    (with-object (stream)
+      (map-slots-with-ommit (cl-json:stream-object-member-encoder stream) self))))
+
 (def method sb-mop:validate-superclass ((self standard-class) s)
   t)
 
@@ -13,6 +26,8 @@
   ((username nil :type string)
    (password-hash nil :type string)
    (uid nil :type string)))
+
+(override-json-serialization user-v)
 
 (def class* server-message ()
   ((message-type nil :type string)
@@ -38,17 +53,7 @@
   (:metaclass selective-serialization-class)
   (:ommit-when-serializing password-hash admin-id))
 
-(def method cl-json:encode-json ((self channel) &optional stream)
-  (with-object (stream)
-    (map-slots-with-ommit (cl-json:stream-object-member-encoder stream) self)))
-
-(defun map-slots-with-ommit (function object)
-  (let ((om (ommit (class-of object))))
-    (loop for slot in (closer-mop:class-slots (class-of object))
-       for slot-name = (closer-mop:slot-definition-name slot)
-       if (and (slot-boundp object slot-name)
-               (not (member slot-name om)))
-       do (funcall function slot-name (slot-value object slot-name)))))
+(override-json-serialization channel)
 
 (def class* server ()
   ((users-by-uid (make-hash-table :test #'equal) :type hash-table)
