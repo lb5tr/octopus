@@ -50,24 +50,32 @@
 (defun ensure-user-authenticated (uid)
   (get-user *server* uid :users-by 'users-by-uid-of))
 
+(defun ensure-proper-channel (channel-data)
+  (let ((channel-name (name-of channel-data)))
+    (if (emptyp channel-name)
+        (values nil 'invalid-name)
+        (if (ensure-unique-channel channel-name)
+            (values t nil)
+            (values nil 'channel-already-exisits)))))
+
 (def auth-handler list-channels (payload uid)
     `(:message-type :ok
                     :payload ,(channels-of *server*)))
 
-;TODO
-;-empty channel name
-;-set protected slot if password-hash not null
-;-data sanitization
 (def auth-handler create-channel (channel-data uid)
   (let ((channel-name (name-of channel-data))
-        (nuid (funcall *new-uid*)))
-    (if (ensure-unique-channel channel-name)
+        (nuid (funcall *new-uid*))
+        (password (password-hash-of channel-data)))
+    (multiple-value-bind (ret code) (ensure-proper-channel channel-data)
+      (if ret
         (progn
           (setf (admin-id-of channel-data) uid
                 (channel-locator-of channel-data) nuid)
+          (when (not (emptyp password))
+            (setf (protected-of channel-data) t))
           (add-channel *server* channel-name channel-data)
           `(:message-type :ok :payload ,channel-data))
-        '(:message-type :error :error-type channel-already-exisits))))
+        `(:message-type :error :error-type ,code)))))
 
 (defun logout (payload uid)
   (if (rm-user *server* uid :users-by 'users-by-uid-of)

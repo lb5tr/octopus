@@ -32,7 +32,7 @@
    (capacity 0 :type integer)
    (players-count 0 :type integer)
    (password-hash nil :type string)
-   (protected nil :type boolean)
+   (protected nil)
    (creation-time (get-universal-time) :type date)
    (worker nil))
   (:metaclass selective-serialization-class)
