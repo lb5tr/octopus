@@ -51,7 +51,7 @@
    (creation-time (get-universal-time) :type date)
    (worker nil))
   (:metaclass selective-serialization-class)
-  (:ommit-when-serializing password-hash admin-id))
+  (:ommit-when-serializing password-hash admin-id worker))
 
 (override-json-serialization channel)
 
@@ -102,3 +102,19 @@
 (defmethod resource-received-binary((res channel-manager-resource) client message)
   (log-as info "got binary frame len: ~s" (length message) client)
   (write-to-client-binary client message))
+
+(def class* channel-resource (ws-resource)
+  ())
+
+(defmethod resource-client-connected ((res channel-resource) client)
+  (log-as info "client connected on channel-manager server from ~s : ~s" (client-host client) (client-port client))
+  t)
+
+(defmethod resource-client-disconnected ((resource channel-resource) client)
+  (log-as info "client disconnected from resource ~A" resource))
+
+(defmethod resource-received-text ((res channel-resource) client message)
+  (log-as info "got frame ~s... from client ~s" message client))
+
+(defmethod resource-received-binary((res channel-resource) client message)
+  (log-as info "got binary frame len: ~s" (length message) client))

@@ -73,6 +73,11 @@
                 (channel-locator-of channel-data) nuid)
           (when (not (emptyp password))
             (setf (protected-of channel-data) t))
+          (setf (worker-of channel-data)
+                (start-ws-resource (concatenate 'string "/" nuid)
+                                   '("")
+                                   'channel-resource
+                                   nuid))
           (add-channel *server* channel-name channel-data)
           `(:message-type :ok :payload ,channel-data))
         `(:message-type :error :error-type ,code)))))
