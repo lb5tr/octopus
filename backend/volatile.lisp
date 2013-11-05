@@ -72,7 +72,7 @@
 
 (def method rm-user ((srv server) value &key users-by)
   (let ((user (get-user srv value :users-by users-by)))
-    (when (not (eq user nil))
+    (unless (eq user nil)
       (remhash (username-of user) (users-by-username-of srv))
       (remhash (uid-of user) (users-by-uid-of srv))
       t)))

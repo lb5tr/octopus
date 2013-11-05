@@ -71,7 +71,7 @@
         (progn
           (setf (admin-id-of channel-data) uid
                 (channel-locator-of channel-data) nuid)
-          (when (not (emptyp password))
+          (unless (emptyp password)
             (setf (protected-of channel-data) t))
           (setf (worker-of channel-data)
                 (start-ws-resource (concatenate 'string "/" nuid)
