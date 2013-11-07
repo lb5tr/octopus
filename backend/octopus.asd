@@ -17,6 +17,7 @@
      :cl-json
      :ironclad
      :closer-mop
+     :fiveam
      :log5
      :alexandria)
     :serial t
@@ -28,5 +29,6 @@
                  (:file "log")
                  (:file "volatile")
                  (:file "server")
-                 (:file "octopus")))
+                 (:file "octopus")
+                 (:file "tests")))
 

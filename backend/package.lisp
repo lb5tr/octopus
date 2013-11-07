@@ -5,6 +5,7 @@
         :log5
         :hu.dwim.def
         :hu.dwim.perec
+        :fiveam
         :ironclad
         :closer-mop
         :alexandria
