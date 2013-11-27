@@ -25,7 +25,8 @@
 (def class* user-v ()
   ((username nil :type string)
    (password-hash nil :type string)
-   (uid nil :type string)))
+   (uid nil :type string)
+   (channel nil :type channel)))
 
 (override-json-serialization user-v)
 
@@ -62,6 +63,9 @@
 
 (def method add-channel ((srv server) name channel-data)
   (setf (gethash name (channels-of srv)) channel-data))
+
+(def method get-channel ((srv server) name)
+  (gethash name (channels-of srv)))
 
 (def method add-user ((srv server) uid user-data)
   (setf (gethash uid (users-by-uid-of srv)) user-data)

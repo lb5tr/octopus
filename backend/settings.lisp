@@ -32,10 +32,12 @@
     (user-not-authenticated . 3)
     (undefined-message-type . 4)
     (channel-already-exisits . 5)
-    (invalid-name . 6)))
+    (invalid-name . 6)
+    (user-already-at-channel . 7)
+    (no-such-channel . 8)))
 
 ;others
 (defparameter *default-digest* 'sha1)
 (defparameter *new-uid* (let ((uuid (random-string)))
-			  (lambda ()
-			    (setf uuid (hash-string uuid :digest *default-digest*)))))
+                          (lambda ()
+                            (setf uuid (hash-string uuid :digest *default-digest*)))))

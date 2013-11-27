@@ -2,9 +2,10 @@
 
 (def definer auth-handler (name (payload uid) &body body)
   `(defun ,name (,payload ,uid)
-     (apply #'response-with (if (ensure-user-authenticated ,uid)
-         (progn ,@body)
-         '(:message-type :error :error-type user-not-authenticated)))))
+     (apply #'response-with (block handler (if (ensure-user-authenticated ,uid)
+                                               (progn ,@body)
+                                               '(:message-type :error :error-type user-not-authenticated))))))
+
 
 (defparameter *server* (make-instance 'server))
 
@@ -14,9 +15,9 @@
 (defun login (user-data uid)
   (apply #'response-with
          (cond
-           ((ensure-user-not-logged-in user-data)
-            (log-as info "user ~A already exists" (username-of user-data))
-            '(:message-type :error :error-type user-already-logged-in))
+           ;; ((ensure-user-not-logged-in user-data)
+           ;;  (log-as info "user ~A already exists" (username-of user-data))
+           ;;  '(:message-type :error :error-type user-already-logged-in))
            ((not (ensure-user-exists-in-database user-data))
             (log-as info "no such user ~A" (username-of user-data))
             '(:message-type :error :error-type no-such-user))
@@ -64,23 +65,33 @@
 
 (def auth-handler create-channel (channel-data uid)
   (let ((channel-name (name-of channel-data))
-        (nuid (funcall *new-uid*))
         (password (password-hash-of channel-data)))
     (multiple-value-bind (ret code) (ensure-proper-channel channel-data)
       (if ret
         (progn
           (setf (admin-id-of channel-data) uid
-                (channel-locator-of channel-data) nuid)
+                (channel-locator-of channel-data) channel-name)
           (unless (emptyp password)
             (setf (protected-of channel-data) t))
           (setf (worker-of channel-data)
-                (start-ws-resource (concatenate 'string "/" nuid)
+                (start-ws-resource (concatenate 'string "/" channel-name)
                                    '("")
                                    'channel-resource
-                                   nuid))
+                                   channel-name))
           (add-channel *server* channel-name channel-data)
           `(:message-type :ok :payload ,channel-data))
         `(:message-type :error :error-type ,code)))))
+
+(def auth-handler join-channel (channel-data uid)
+  (let* ((user (get-user *server* uid :users-by 'users-by-uid-of))
+         (channel-name (name-of channel-data))
+         (chan (get-channel *server* channel-name)))
+    (if chan
+        (progn
+          (log-as :info "User ~A joining ~A~%" (username-of user) channel-name)
+          (setf (channel-of user) chan)
+          (return-from handler `(:message-type :ok :payload ,chan)))
+        (return-from handler '(:message-type :error :error-type no-such-channel)))))
 
 (defun logout (payload uid)
   (if (rm-user *server* uid :users-by 'users-by-uid-of)
@@ -107,7 +118,8 @@
     ("login" . login)
     ("logout" . logout)
     ("list" . list-channels)
-    ("create" . create-channel)))
+    ("create" . create-channel)
+    ("join" . join-channel)))
 
 ;message to payload type
 (defparameter *message-payload-alist*
@@ -115,7 +127,8 @@
     (logout . dummy)
     (undefined-command . dummy)
     (list-channels . dummy)
-    (create-channel . channel)))
+    (create-channel . channel)
+    (join-channel . channel)))
 
 (defun json-to-client-message (json)
   (let* ((alist (decode-json-from-string json))

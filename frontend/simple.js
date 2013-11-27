@@ -1,4 +1,5 @@
 var socket = null;
+var channelSocket = null;
 var UID = null;
 var lastWas = null;
 
@@ -71,6 +72,25 @@ function login(username, password)
     socket.send(JSON.stringify(msg));
 }
 
+function joinChannel()
+{
+    lastWas = "joinChannel";
+    msg = {
+        messageType: "join",
+        uid : UID,
+        payload : {
+            name : this.name
+        }
+    };
+
+    socket.send(JSON.stringify(msg));
+}
+
+function afterJoinChannel(channel)
+{
+    console.log(channel.channelLocator);
+}
+
 function dispatch (data)
 {
     obj = JSON.parse(data);
@@ -84,6 +104,7 @@ function dispatch (data)
             case "createChannel": afterCreate(obj.payload);break;
             case "logout": afterLogout(obj.payload); break;
             case "listChannels": afterList(obj.payload); break;
+            case "joinChannel": afterJoinChannel(obj.payload); break;
         };
     }
     else
@@ -145,6 +166,8 @@ function afterList(channels)
     $("#channelsList").html("");
     for (var key in channels)
     {
-        $("#channelsList").append("<a href='"+channels[key].channelLocator+"'>"+channels[key].name+"</a></br>");
+        var name = channels[key].name;
+        $("#channelsList").append('<a class="channelLink" name="'+name+'">'+name+'</a></br>');
     }
+    $(".channelLink").click(joinChannel);
 }
