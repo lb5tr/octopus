@@ -1,32 +1,13 @@
 (in-package :octopus)
 
-(def definer auth-handler (name (payload uid) &body body)
-  `(defun ,name (,payload ,uid)
+(def definer auth-handler (name (payload uid client) &body body)
+  `(defun ,name (,payload ,uid ,client)
      (apply #'response-with (block handler (if (ensure-user-authenticated ,uid)
                                                (progn ,@body)
                                                '(:message-type :error :error-type user-not-authenticated))))))
 
 
 (defparameter *server* (make-instance 'server))
-
-(defun undefined-command (payload uid)
-  (response-with :message-type :error :error-type 'undefined-message-type))
-
-(defun login (user-data uid)
-  (apply #'response-with
-         (cond
-           ;; ((ensure-user-not-logged-in user-data)
-           ;;  (log-as info "user ~A already exists" (username-of user-data))
-           ;;  '(:message-type :error :error-type user-already-logged-in))
-           ((not (ensure-user-exists-in-database user-data))
-            (log-as info "no such user ~A" (username-of user-data))
-            '(:message-type :error :error-type no-such-user))
-           (t (let ((new-uid (funcall *new-uid*)))
-                (add-user *server* new-uid
-                          (make-instance 'user-v
-                                         :username (username-of user-data)
-                                         :uid new-uid))
-                `(:message-type :ok :payload ,new-uid))))))
 
 (defun ensure-user-not-logged-in (user-data)
   (get-user *server*
@@ -59,11 +40,32 @@
             (values t nil)
             (values nil 'channel-already-exisits)))))
 
-(def auth-handler list-channels (payload uid)
+(defun undefined-command (payload uid client)
+  (response-with :message-type :error :error-type 'undefined-message-type))
+
+(defun login (user-data uid client)
+  (apply #'response-with
+         (cond
+           ;; ((ensure-user-not-logged-in user-data)
+           ;;  (log-as info "user ~A already exists" (username-of user-data))
+           ;;  '(:message-type :error :error-type user-already-logged-in))
+           ((not (ensure-user-exists-in-database user-data))
+            (log-as info "no such user ~A" (username-of user-data))
+            '(:message-type :error :error-type no-such-user))
+           (t (let ((new-uid (funcall *new-uid*)))
+                (add-user *server* new-uid
+                          (make-instance 'user-v
+                                         :username (username-of user-data)
+                                         :uid new-uid
+                                         :socket client))
+                `(:message-type :ok :payload ,new-uid))))))
+
+
+(def auth-handler list-channels (payload uid client)
     `(:message-type :ok
                     :payload ,(channels-of *server*)))
 
-(def auth-handler create-channel (channel-data uid)
+(def auth-handler create-channel (channel-data uid client)
   (let ((channel-name (name-of channel-data))
         (password (password-hash-of channel-data)))
     (multiple-value-bind (ret code) (ensure-proper-channel channel-data)
@@ -82,7 +84,7 @@
           `(:message-type :ok :payload ,channel-data))
         `(:message-type :error :error-type ,code)))))
 
-(def auth-handler join-channel (channel-data uid)
+(def auth-handler join-channel (channel-data uid client)
   (let* ((user (get-user *server* uid :users-by 'users-by-uid-of))
          (channel-name (name-of channel-data))
          (chan (get-channel *server* channel-name)))
@@ -93,7 +95,7 @@
           (return-from handler `(:message-type :ok :payload ,chan)))
         (return-from handler '(:message-type :error :error-type no-such-channel)))))
 
-(defun logout (payload uid)
+(defun logout (payload uid client)
   (if (rm-user *server* uid :users-by 'users-by-uid-of)
       (response-with :message-type :ok)
       (response-with :message-type :error
@@ -146,9 +148,9 @@
                       :payload (apply #'make-instance payload-class
                                       (alist-plist (assoc-cdr :payload alist)))))))
 
-(defun dispatch-message (client-msg)
+(defun dispatch-message (client-msg &key client)
   (let ((msg-function (message-type-of client-msg))
         (payload (payload-of client-msg))
         (uid (uid-of client-msg)))
     (log-as info "dispatching ~A" msg-function)
-    (funcall msg-function payload uid)))
+    (funcall msg-function payload uid client)))
