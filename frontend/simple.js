@@ -31,8 +31,8 @@ function initWebSockets()
 {
     socket = new WebSocket($("#address").val());
     socket.onmessage = function (msg){
-          dispatch(msg.data);
-        };
+        dispatch(msg.data);
+    };
 
     $("#log").html("OK");
 }
@@ -49,11 +49,11 @@ function createChannel()
             map : $("#map").val()
         }};
 
-        if ($("#cpassword").val() != ""){
-            msg.payload.passwordHash = CryptoJS.SHA1($("#cpassword").val()) + '';
-        }
+    if ($("#cpassword").val() != ""){
+        msg.payload.passwordHash = CryptoJS.SHA1($("#cpassword").val()) + '';
+    }
 
-        socket.send(JSON.stringify(msg));
+    socket.send(JSON.stringify(msg));
 }
 
 function login(username, password)
@@ -86,9 +86,14 @@ function joinChannel()
     socket.send(JSON.stringify(msg));
 }
 
-function afterJoinChannel(channel)
+function hideMenu()
 {
-    console.log(channel.channelLocator);
+    $("#menu").css("display", "none");  
+}
+
+function showGame()
+{
+    $("#game").css("display", "block");
 }
 
 function dispatch (data)
@@ -100,17 +105,37 @@ function dispatch (data)
         $("#log").html("Success!</br>");
         switch (lastWas)
         {
-            case "login": afterLogin(obj.payload);break;
-            case "createChannel": afterCreate(obj.payload);break;
-            case "logout": afterLogout(obj.payload); break;
-            case "listChannels": afterList(obj.payload); break;
-            case "joinChannel": afterJoinChannel(obj.payload); break;
+        case "login": afterLogin(obj.payload);break;
+        case "createChannel": afterCreate(obj.payload);break;
+        case "logout": afterLogout(obj.payload); break;
+        case "listChannels": afterList(obj.payload); break;
+        case "joinChannel": afterJoinChannel(obj.payload); break;
         };
+    }
+    else
+        if (obj.messageType == "state")
+    {
+        console.log("state!!");
+        currentState = obj.payload;
     }
     else
     {
         $("#log").html("Failed!</br>Description: " + obj.payload.errorDescription);
     }   
+}
+
+function connectChannel(locator)
+{
+    return new WebSocket('ws://' + document.location.host + ':7878/' + locator);
+}
+
+function afterJoinChannel(channel)
+{
+    console.log(channel.channelLocator);
+    var gameSocket = connectChannel(channel.channelLocator);
+    hideMenu();
+    showGame();
+    startGame(gameSocket);
 }
 
 function afterLogout(p)

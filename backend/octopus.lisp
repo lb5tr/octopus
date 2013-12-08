@@ -6,25 +6,24 @@
                                                (progn ,@body)
                                                '(:message-type :error :error-type user-not-authenticated))))))
 
-
 (defparameter *server* (make-instance 'server))
 
 (defun ensure-user-not-logged-in (user-data)
   (get-user *server*
-                 (username-of user-data)
-                 :users-by 'users-by-username-of))
+            (username-of user-data)
+            :users-by 'users-by-username-of))
 
 (defun ensure-user-exists-in-database (user-data)
   (get-user-from-database user-data))
 
 (defun get-user-from-database (user-data)
   (with-transaction
-    (select-instance (u user)
-      (where (and
-              (string= (username-of u)
-                       (username-of user-data))
-              (string= (password-hash-of u)
-                       (password-hash-of user-data)))))))
+      (select-instance (u user)
+                       (where (and
+                               (string= (username-of u)
+                                        (username-of user-data))
+                               (string= (password-hash-of u)
+                                        (password-hash-of user-data)))))))
 
 (defun ensure-unique-channel (channel-name)
   (not (gethash channel-name (channels-of *server*))))
@@ -42,6 +41,25 @@
 
 (defun undefined-command (payload uid client)
   (response-with :message-type :error :error-type 'undefined-message-type))
+
+;dummy for no
+(defun generate-new-state (channel)
+  (let ((users (users-of channel)))
+    (loop for user being the hash-values in users collect
+         (list (pos-x-of user) (pos-y-of user)))))
+
+(defun make-state-broadcast (chan)
+  (let ((channel chan))
+    (lambda ()
+      (loop do
+           (with-lock-held ((lock-of channel))
+             (let ((state (generate-new-state channel))
+                   (users (users-of channel)))
+               (loop for user being the hash-values in users do
+                    (write-to-client-text (socket-of user) (response-with
+                                                            :message-type :state
+                                                            :payload state)))))
+           (sleep *rate*)))))
 
 (defun login (user-data uid client)
   (apply #'response-with
@@ -62,37 +80,59 @@
 
 
 (def auth-handler list-channels (payload uid client)
-    `(:message-type :ok
-                    :payload ,(channels-of *server*)))
+  `(:message-type :ok
+                  :payload ,(channels-of *server*)))
 
 (def auth-handler create-channel (channel-data uid client)
   (let ((channel-name (name-of channel-data))
         (password (password-hash-of channel-data)))
     (multiple-value-bind (ret code) (ensure-proper-channel channel-data)
       (if ret
-        (progn
-          (setf (admin-id-of channel-data) uid
-                (channel-locator-of channel-data) channel-name)
-          (unless (emptyp password)
-            (setf (protected-of channel-data) t))
-          (setf (worker-of channel-data)
-                (start-ws-resource (concatenate 'string "/" channel-name)
-                                   '("")
-                                   'channel-resource
-                                   channel-name))
-          (add-channel *server* channel-name channel-data)
-          `(:message-type :ok :payload ,channel-data))
-        `(:message-type :error :error-type ,code)))))
+          (progn
+            (setf (admin-id-of channel-data) uid
+                  (channel-locator-of channel-data) channel-name)
+            (unless (emptyp password)
+              (setf (protected-of channel-data) t))
+            (setf (listener-of channel-data) (start-ws-resource (concatenate 'string "/" channel-name)
+                                                                '("")
+                                                                'channel-resource
+                                                                channel-name)
+                  (state-broadcast-of channel-data) (make-thread (make-state-broadcast channel-data))
+                  (capacity-of channel-data) (parse-integer (capacity-of channel-data)))
+            (add-channel *server* channel-name channel-data)
+            `(:message-type :ok :payload ,channel-data))
+          `(:message-type :error :error-type ,code)))))
+
+(defun introduce-new-user (channel user)
+  (find-suitable-place-for user channel))
+
+(defun find-suitable-place-for (user channel)
+  (loop while (collisionsp user) do
+       (setf (pos-x-of user) (random *width*))
+       (setf (pos-y-of user) (random *height*))))
+
+;;TODO:implement
+(defun collisionsp (user)
+  nil)
 
 (def auth-handler join-channel (channel-data uid client)
   (let* ((user (get-user *server* uid :users-by 'users-by-uid-of))
          (channel-name (name-of channel-data))
-         (chan (get-channel *server* channel-name)))
-    (if chan
-        (progn
-          (log-as :info "User ~A joining ~A~%" (username-of user) channel-name)
-          (setf (channel-of user) chan)
-          (return-from handler `(:message-type :ok :payload ,chan)))
+         (channel(get-channel *server* channel-name))
+         (players-count (players-count-of channel))
+         (players (users-of channel))
+         (capacity (capacity-of channel))
+         (lock (lock-of channel)))
+    (if channel
+        (if (< players-count capacity)
+            (with-lock-held (lock)
+              (log-as :info "User ~A joining ~A" (username-of user) channel-name)
+              (setf (channel-of user) channel
+                    (gethash uid players) user
+                    (players-count-of channel) (incf players-count))
+              (introduce-new-user channel user)
+              (return-from handler `(:message-type :ok :payload ,channel)))
+            (return-from handler '(:message-type :error :error-type full-channel)))
         (return-from handler '(:message-type :error :error-type no-such-channel)))))
 
 (defun logout (payload uid client)
@@ -103,7 +143,7 @@
 
 (defun response-with (&key message-type (payload nil) (error-type 'unknown))
   (encode-json-to-string
-   (if (eq message-type :ok)
+   (if (or (eq message-type :ok) (eq message-type :state))
        (make-instance 'server-message
                       :message-type message-type
                       :payload payload)
@@ -113,24 +153,38 @@
                                               :error-code (assoc-cdr error-type
                                                                      *error-codes*)
                                               :error-description error-type)))))
+;;TODO: remove duplications
+(def auth-handler handle-player-event (event uid client)
+  (let* ((player (get-user *server* uid :users-by 'users-by-uid-of))
+         (channel (channel-of player))
+         (event-type (event-type-of event)))
+    (with-lock-held ((lock-of channel))
+      (cond
+        ((string= event-type "left") (setf (pos-x-of player) (- (pos-x-of player) 3)))
+        ((string= event-type "right") (setf (pos-x-of player) (+ (pos-x-of player) 3)))
+        ((string= event-type "up") (setf (pos-y-of player) (- (pos-y-of player) 3)))
+        ((string= event-type "down") (setf (pos-y-of player) (+ (pos-y-of player) 3)))))
+    '(:message-type :ok)))
 
-;client message mapping
+;;client message mapping
 (defparameter *message-type-alist*
   '(("undefined" . undefined-command)
     ("login" . login)
     ("logout" . logout)
     ("list" . list-channels)
     ("create" . create-channel)
-    ("join" . join-channel)))
+    ("join" . join-channel)
+    ("event" . handle-player-event)))
 
-;message to payload type
+;;message to payload type
 (defparameter *message-payload-alist*
   '((login . user-v)
     (logout . dummy)
     (undefined-command . dummy)
     (list-channels . dummy)
     (create-channel . channel)
-    (join-channel . channel)))
+    (join-channel . channel)
+    (handle-player-event . event)))
 
 (defun json-to-client-message (json)
   (let* ((alist (decode-json-from-string json))
@@ -141,16 +195,16 @@
          (payload-class (assoc-cdr msg-class *message-payload-alist*
                                    :test #'equal)))
     (if (or (not msg-type-string) (not msg-class) (not payload-class))
-       (make-instance 'client-message :message-type 'undefined)
-       (make-instance 'client-message
-                      :message-type msg-class
-                      :uid uid
-                      :payload (apply #'make-instance payload-class
-                                      (alist-plist (assoc-cdr :payload alist)))))))
+        (make-instance 'client-message :message-type 'undefined)
+        (make-instance 'client-message
+                       :message-type msg-class
+                       :uid uid
+                       :payload (apply #'make-instance payload-class
+                                       (alist-plist (assoc-cdr :payload alist)))))))
 
 (defun dispatch-message (client-msg &key client)
   (let ((msg-function (message-type-of client-msg))
         (payload (payload-of client-msg))
         (uid (uid-of client-msg)))
-    (log-as info "dispatching ~A" msg-function)
+    (log-as :info "dispatching ~A" msg-function)
     (funcall msg-function payload uid client)))

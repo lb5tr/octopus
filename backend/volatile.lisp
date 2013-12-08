@@ -10,8 +10,8 @@
 
 (def macro override-json-serialization (class-to-override)
   `(def method cl-json:encode-json ((self ,class-to-override) &optional stream)
-    (with-object (stream)
-      (map-slots-with-ommit (cl-json:stream-object-member-encoder stream) self))))
+     (with-object (stream)
+       (map-slots-with-ommit (cl-json:stream-object-member-encoder stream) self))))
 
 (def method sb-mop:validate-superclass ((self standard-class) s)
   t)
@@ -26,8 +26,12 @@
   ((username nil :type string)
    (password-hash nil :type string)
    (uid nil :type string)
+   (pos-x (random *width*) :type integer)
+   (pos-y (random *height*) :type integer)
    (socket nil)
-   (channel nil :type channel)))
+   (channel nil :type channel))
+  (:metaclass selective-serialization-class)
+  (:ommit-when-serializing password-hash admin-id worker lock socket channel))
 
 (override-json-serialization user-v)
 
@@ -40,20 +44,26 @@
    (message-type "undefined" :type string)
    (payload nil)))
 
+(def class* event ()
+  ((event-type nil :type string)))
+
 (def class* channel ()
   ((name nil :type string)
    (channel-locator nil :type string)
    (users (make-hash-table) :type hash-table)
    (map nil :type string)
    (admin-id nil :type string)
-   (capacity 0 :type integer)
+   (capacity :type integer)
    (players-count 0 :type integer)
    (password-hash nil :type string)
    (protected nil)
    (creation-time (get-universal-time) :type date)
-   (worker nil))
+   (listener nil)
+   (state-broadcast nil)
+   (lock (make-lock)))
   (:metaclass selective-serialization-class)
-  (:ommit-when-serializing password-hash admin-id worker))
+  (:ommit-when-serializing password-hash admin-id
+                           lock state-broadcast listener))
 
 (override-json-serialization channel)
 
@@ -89,7 +99,7 @@
 (def method initialize-instance :after ((self error-payload) &rest args)
      (setf (error-description-of self) (symbol-name (getf args :error-description))))
 
-;channel manager resource
+;;channel manager resource
 (def class* channel-manager-resource (ws-resource)
   ())
 
@@ -108,18 +118,20 @@
   (log-as info "got binary frame len: ~s" (length message) client)
   (write-to-client-binary client message))
 
+;;channel handlers
 (def class* channel-resource (ws-resource)
   ())
 
 (defmethod resource-client-connected ((res channel-resource) client)
-  (log-as info "client connected on channel-manager server from ~s : ~s" (client-host client) (client-port client))
+  (log-as info "client connected on channel from ~s : ~s" (client-host client) (client-port client))
   t)
 
 (defmethod resource-client-disconnected ((resource channel-resource) client)
   (log-as info "client disconnected from resource ~A" resource))
 
 (defmethod resource-received-text ((res channel-resource) client message)
-  (log-as info "got frame ~s... from client ~s" message client))
+  (log-as info "got frame ~s... from client ~s" message client)
+  (write-to-client-text client (dispatch-message (json-to-client-message message) :client client)))
 
 (defmethod resource-received-binary((res channel-resource) client message)
   (log-as info "got binary frame len: ~s" (length message) client))

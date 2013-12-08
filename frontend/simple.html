@@ -8,36 +8,43 @@
     <style>
       td
       {
-        vertical-align: text-top;
+      vertical-align: text-top;
       }
     </style>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha1.js"></script>
+    <script src="http://jawsjs.com/jawsjs/jaws-dynamic.js"></script>
+    <script src="engine.js"></script>
     <script src="simple.js"></script>
-    <h1>Connect</h1>
-    <p id="log"><p>
-      <table>
-        <tr><td><label for="address">address</label></td><td><input id="address" type="text" value="ws://127.0.0.1:7878/channel-manager"/></td></tr>
-        <tr><td><input type="button" id="connect" value="connect!"/></td></tr>
-      </table>
-      <h1>Login</h1>
-      <table>
-        <tr><td><label for="userName">username</label></td><td><input id="userName" type="text" value="test-user"/></td></tr>
-        <tr><td><label for="password">password</label></td><td><input id="password" type="password" value="abc"/></td></tr>
-        <tr><td><input type="button" id="login"  value="login!"/></td><td><input type="button" id="logout" value="logout!"/></td></tr>
-      </table>
-      <div style="display:none;" id="loggedZone">
-        <form>
-          <h1>Create channel</h1>
-          <table>
-            <tr><td><label for="name">name</label></td><td><input type="text" id="name"/></td></tr>
-            <tr><td><label for="capacity">capacity</label></td><td><input type="text" id="capacity"/></td></tr>
-            <tr><td><label for="map">map</label></td><td><input type="text" id="map"/></td></tr>
-            <tr><td><label for="password">password</label></td><td><input type="text" id="cpassword"/></td></tr>
-            <tr><td><input type="button" id="createChannel" value="create!"/></td><td><input type="button" id="listChannels" value="refresh"/></td></tr></table>
-        </form>
-        <p id="channelsList"></p>
-      </div>
-      </form>
-  </body>
+    <div id="game" style="display:none;">
+      <canvas width=500 height=500 id="canvas"><canvas>
+    </div>
+    <div id="menu">
+      <h1>Connect</h1>
+      <p id="log"><p>
+        <table>
+          <tr><td><label for="address">address</label></td><td><input id="address" type="text" value="ws://127.0.0.1:7878/channel-manager"/></td></tr>
+          <tr><td><input type="button" id="connect" value="connect!"/></td></tr>
+        </table>
+        <h1>Login</h1>
+        <table>
+          <tr><td><label for="userName">username</label></td><td><input id="userName" type="text" value="test-user"/></td></tr>
+          <tr><td><label for="password">password</label></td><td><input id="password" type="password" value="abc"/></td></tr>
+          <tr><td><input type="button" id="login"  value="login!"/></td><td><input type="button" id="logout" value="logout!"/></td></tr>
+        </table>
+        <div style="display:none;" id="loggedZone">
+          <form>
+            <h1>Create channel</h1>
+            <table>
+              <tr><td><label for="name">name</label></td><td><input type="text" id="name"/></td></tr>
+              <tr><td><label for="capacity">capacity</label></td><td><input type="text" id="capacity"/></td></tr>
+              <tr><td><label for="map">map</label></td><td><input type="text" id="map"/></td></tr>
+              <tr><td><label for="password">password</label></td><td><input type="text" id="cpassword"/></td></tr>
+              <tr><td><input type="button" id="createChannel" value="create!"/></td><td><input type="button" id="listChannels" value="refresh"/></td></tr></table>
+          </form>
+          <p id="channelsList"></p>
+        </div>
+        <div/>
+</form>
+</body>
 </html>

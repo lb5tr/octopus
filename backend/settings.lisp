@@ -34,10 +34,14 @@
     (channel-already-exisits . 5)
     (invalid-name . 6)
     (user-already-at-channel . 7)
-    (no-such-channel . 8)))
+    (no-such-channel . 8)
+    (full-channel . 9)))
 
 ;others
 (defparameter *default-digest* 'sha1)
+(defparameter *width* 500)
+(defparameter *height* 500)
+(defparameter *rate* 1/30)
 (defparameter *new-uid* (let ((uuid (random-string)))
                           (lambda ()
                             (setf uuid (hash-string uuid :digest *default-digest*)))))
