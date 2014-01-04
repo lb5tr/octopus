@@ -1,5 +1,8 @@
 (in-package :octopus)
 
+(defun root-of-unity (k)
+  `(:x ,(cos (/ (* 2 3.14 k) 36)) :y ,(sin (/ (* 2 3.14 k) 36))))
+
 (defun clws-debug (&key enable)
   (setf clws:*debug-on-server-errors* enable
 	clws:*debug-on-resource-errors* enable))

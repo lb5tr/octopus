@@ -39,9 +39,11 @@
 
 ;others
 (defparameter *default-digest* 'sha1)
-(defparameter *width* 500)
-(defparameter *height* 500)
+(defparameter *width* 700)
+(defparameter *height* 350)
 (defparameter *rate* 1/30)
+(defparameter *ball-radius* 20)
+(defparameter *palyer-radius* 20)
 (defparameter *new-uid* (let ((uuid (random-string)))
                           (lambda ()
                             (setf uuid (hash-string uuid :digest *default-digest*)))))

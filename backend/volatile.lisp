@@ -22,12 +22,16 @@
 (def class* dummy ()
   ())
 
-(def class* user-v ()
+(def class* ball ()
+  ((position (list :x 350 :y 175) :type list)
+   (v 4 :type integer)
+   (direction (root-of-unity 0) :type list)
+   (radius 21 :type integer)))
+
+(def class* user-v (ball)
   ((username nil :type string)
    (password-hash nil :type string)
    (uid nil :type string)
-   (pos-x (random *width*) :type integer)
-   (pos-y (random *height*) :type integer)
    (socket nil)
    (channel nil :type channel))
   (:metaclass selective-serialization-class)
@@ -47,6 +51,10 @@
 (def class* event ()
   ((event-type nil :type string)))
 
+(def class* game-state ()
+  ((players)
+   (ball-instance :type ball)))
+
 (def class* channel ()
   ((name nil :type string)
    (channel-locator nil :type string)
@@ -54,6 +62,7 @@
    (map nil :type string)
    (admin-id nil :type string)
    (capacity :type integer)
+   (ball-instance (make-instance 'ball) :type ball)
    (players-count 0 :type integer)
    (password-hash nil :type string)
    (protected nil)

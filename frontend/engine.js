@@ -4,8 +4,13 @@ player = null;
 
 function sendEvent(ev)
 {
+    lastWas = "sendEvent";
     msg = {messageType : "event", uid: UID, payload: { eventType: ev }};
-    socket.send(JSON.stringify(msg));
+    setTimeout(socket.send(JSON.stringify(msg)), 1/30);
+}
+
+function afterSendEvent(data)
+{
 }
 
 function PlayState() {
@@ -23,12 +28,13 @@ function PlayState() {
 
     this.draw = function() {
         jaws.clear()
-
+        jaws.context.drawImage(jaws.assets.get("field.png"), 0, 0);
         if (currentState){
-            for (var i=0;i<currentState.length; i++)
+            for (var i=0;i<currentState.players.length; i++)
             {
-                jaws.context.drawImage(jaws.assets.get("bullet.png"), currentState[i][0], currentState[i][1]);
+                jaws.context.drawImage(jaws.assets.get("bullet.png"), currentState.players[i][1]-5, currentState.players[i][3]-5);
             }
+            jaws.context.drawImage(jaws.assets.get("ball.png"), currentState.ballInstance.position[1]-currentState.ballInstance.radius, currentState.ballInstance.position[3]-currentState.ballInstance.radius);
         }
     }
 
@@ -84,8 +90,10 @@ function startGame(socket) {
 
     socket.onmessage = function (msg) { stateUpdate(msg.data); };
 
-    jaws.assets.add("plane.png")
-    jaws.assets.add("bullet.png")
-    jaws.start(PlayState)
+    jaws.assets.add("plane.png");
+    jaws.assets.add("field.png");
+    jaws.assets.add("bullet.png");
+    jaws.assets.add("ball.png");
+    jaws.start(PlayState);
 }
 

@@ -4,7 +4,7 @@ var UID = null;
 var lastWas = null;
 
 $(document).ready(function ( ) {
-    
+
     $('#login').click( function () {
         login($("#userName").val(), $("password").val());
     });
@@ -110,6 +110,7 @@ function dispatch (data)
         case "logout": afterLogout(obj.payload); break;
         case "listChannels": afterList(obj.payload); break;
         case "joinChannel": afterJoinChannel(obj.payload); break;
+        case "sendEvent": afterSendEvent(obj.payload); break;
         };
     }
     else

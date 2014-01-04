@@ -42,11 +42,15 @@
 (defun undefined-command (payload uid client)
   (response-with :message-type :error :error-type 'undefined-message-type))
 
-;dummy for no
 (defun generate-new-state (channel)
-  (let ((users (users-of channel)))
-    (loop for user being the hash-values in users collect
-         (list (pos-x-of user) (pos-y-of user)))))
+  (let* ((users (users-of channel))
+         (users-positions (loop for user being the hash-values in users collect
+                               (position-of user)))
+         (balli (ball-instance-of channel)))
+    (setf (ball-instance-of channel) (next-position balli))
+    (collision-between (ball-instance-of channel) (loop for user being the hash-values in users collect user
+))
+    (make-instance 'game-state :players users-positions :ball-instance balli)))
 
 (defun make-state-broadcast (chan)
   (let ((channel chan))
@@ -98,7 +102,8 @@
                                                                 'channel-resource
                                                                 channel-name)
                   (state-broadcast-of channel-data) (make-thread (make-state-broadcast channel-data))
-                  (capacity-of channel-data) (parse-integer (capacity-of channel-data)))
+                  (capacity-of channel-data) (parse-integer (capacity-of channel-data))
+                  (ball-instance-of channel-data) (make-instance 'ball))
             (add-channel *server* channel-name channel-data)
             `(:message-type :ok :payload ,channel-data))
           `(:message-type :error :error-type ,code)))))
@@ -107,9 +112,7 @@
   (find-suitable-place-for user channel))
 
 (defun find-suitable-place-for (user channel)
-  (loop while (collisionsp user) do
-       (setf (pos-x-of user) (random *width*))
-       (setf (pos-y-of user) (random *height*))))
+  (setf (position-of user) '(:x 200 :y 200)))
 
 ;;TODO:implement
 (defun collisionsp (user)
@@ -129,7 +132,8 @@
               (log-as :info "User ~A joining ~A" (username-of user) channel-name)
               (setf (channel-of user) channel
                     (gethash uid players) user
-                    (players-count-of channel) (incf players-count))
+                    (players-count-of channel) (incf players-count)
+                    (radius-of user) 5)
               (introduce-new-user channel user)
               (return-from handler `(:message-type :ok :payload ,channel)))
             (return-from handler '(:message-type :error :error-type full-channel)))
@@ -157,13 +161,18 @@
 (def auth-handler handle-player-event (event uid client)
   (let* ((player (get-user *server* uid :users-by 'users-by-uid-of))
          (channel (channel-of player))
+         (position (position-of player))
          (event-type (event-type-of event)))
     (with-lock-held ((lock-of channel))
       (cond
-        ((string= event-type "left") (setf (pos-x-of player) (- (pos-x-of player) 3)))
-        ((string= event-type "right") (setf (pos-x-of player) (+ (pos-x-of player) 3)))
-        ((string= event-type "up") (setf (pos-y-of player) (- (pos-y-of player) 3)))
-        ((string= event-type "down") (setf (pos-y-of player) (+ (pos-y-of player) 3)))))
+        ((string= event-type "left") (setf (position-of player)
+                                           (add-vectors position '(:x -3 :y  0))))
+        ((string= event-type "right")(setf (position-of player)
+                                           (add-vectors position '(:x 3 :y  0))))
+        ((string= event-type "up")   (setf (position-of player)
+                                           (add-vectors position '(:x  0 :y -3))))
+        ((string= event-type "down") (setf (position-of player)
+                                           (add-vectors position '(:x  0 :y  3))))))
     '(:message-type :ok)))
 
 ;;client message mapping

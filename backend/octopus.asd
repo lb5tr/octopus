@@ -16,6 +16,7 @@
      :hu.dwim.perec.postgresql
      :cl-json
      :ironclad
+     :pal
      :closer-mop
      :fiveam
      :log5
@@ -29,6 +30,7 @@
                  (:file "log")
                  (:file "volatile")
                  (:file "server")
+                 (:file "collisions")
                  (:file "octopus")
                  (:file "tests")))
 
