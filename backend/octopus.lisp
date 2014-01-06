@@ -53,17 +53,16 @@
     (make-instance 'game-state :players users-positions :ball-instance balli)))
 
 (defun make-state-broadcast (chan)
-  (let ((channel chan))
-    (lambda ()
-      (loop do
-           (with-lock-held ((lock-of channel))
-             (let ((state (generate-new-state channel))
-                   (users (users-of channel)))
-               (loop for user being the hash-values in users do
-                    (write-to-client-text (socket-of user) (response-with
-                                                            :message-type :state
-                                                            :payload state)))))
-           (sleep *rate*)))))
+  (lambda ()
+    (loop do
+         (with-lock-held ((lock-of chan))
+           (let ((state (generate-new-state chan))
+                 (users (users-of chan)))
+             (loop for user being the hash-values in users do
+                  (write-to-client-text (socket-of user) (response-with
+                                                          :message-type :state
+                                                          :payload state)))))
+         (sleep *rate*))))
 
 (defun login (user-data uid client)
   (apply #'response-with
@@ -114,9 +113,30 @@
 (defun find-suitable-place-for (user channel)
   (setf (position-of user) '(:x 200 :y 200)))
 
-;;TODO:implement
-(defun collisionsp (user)
-  nil)
+(defun find-user-by-socket (client)
+  (block outter
+    (loop for user being the hash-value of (users-by-uid-of *server*) when
+         (eq (socket-of user) client) do
+         (return-from outter user))))
+
+(defun leave-channel (user)
+  (let* ((channel (channel-of user))
+         (lock (lock-of channel)))
+    (with-lock-held (lock)
+      (log-as :info "removing user ~A of uid ~A" user (uid-of user))
+      (remhash (uid-of user) (users-of channel))
+      (decf (players-count-of channel)))))
+
+(defun leave-server (user)
+  (remhash (uid-of user) (users-by-uid-of *server*))
+  (remhash (username-of user) (users-by-username-of *server*)))
+
+(defun dispose (client)
+  (let ((user (find-user-by-socket client)))
+    (when user
+      (if (channel-of user)
+          (leave-channel user))
+      (leave-server  user))))
 
 (def auth-handler join-channel (channel-data uid client)
   (let* ((user (get-user *server* uid :users-by 'users-by-uid-of))

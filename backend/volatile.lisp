@@ -58,7 +58,7 @@
 (def class* channel ()
   ((name nil :type string)
    (channel-locator nil :type string)
-   (users (make-hash-table) :type hash-table)
+   (users (make-hash-table :test #'equal) :type hash-table)
    (map nil :type string)
    (admin-id nil :type string)
    (capacity :type integer)
@@ -117,7 +117,8 @@
   t)
 
 (defmethod resource-client-disconnected ((resource channel-manager-resource) client)
-  (log-as info "client disconnected from resource ~A" resource))
+  (log-as info "client disconnected from resource ~A" resource)
+  (dispose client))
 
 (defmethod resource-received-text ((res channel-manager-resource) client message)
   (log-as info "got frame ~s... from client ~s" message client)
