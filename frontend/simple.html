@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="main.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
     <title>Simple</title>
-    <link href="http://kevinburke.bitbucket.org/markdowncss/markdown.css" rel="stylesheet"></link>
   </head>
   <body>
-    <style>
-      td
-      {
-      vertical-align: text-top;
-      }
-    </style>
+
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha1.js"></script>
     <script src="http://jawsjs.com/jawsjs/jaws-dynamic.js"></script>
@@ -20,31 +18,49 @@
       <canvas width=700 height=350 id="canvas"><canvas>
     </div>
     <div id="menu">
-      <h1>Connect</h1>
-      <p id="log"><p>
-        <table>
-          <tr><td><label for="address">address</label></td><td><input id="address" type="text" value="ws://127.0.0.1:7878/channel-manager"/></td></tr>
-          <tr><td><input type="button" id="connect" value="connect!"/></td></tr>
-        </table>
+      <div class="alert alert-danger" id="error"></div>
+      <div id="loginBox" class="box">
         <h1>Login</h1>
-        <table>
-          <tr><td><label for="userName">username</label></td><td><input id="userName" type="text" value="test-user"/></td></tr>
-          <tr><td><label for="password">password</label></td><td><input id="password" type="password" value="abc"/></td></tr>
-          <tr><td><input type="button" id="login"  value="login!"/></td><td><input type="button" id="logout" value="logout!"/></td></tr>
-        </table>
-        <div style="display:none;" id="loggedZone">
-          <form>
-            <h1>Create channel</h1>
-            <table>
-              <tr><td><label for="name">name</label></td><td><input type="text" id="name"/></td></tr>
-              <tr><td><label for="capacity">capacity</label></td><td><input type="text" id="capacity"/></td></tr>
-              <tr><td><label for="map">map</label></td><td><input type="text" id="map"/></td></tr>
-              <tr><td><label for="password">password</label></td><td><input type="text" id="cpassword"/></td></tr>
-              <tr><td><input type="button" id="createChannel" value="create!"/></td><td><input type="button" id="listChannels" value="refresh"/></td></tr></table>
-          </form>
-          <p id="channelsList"></p>
+        <div class="wrap">
+          <div class="input-group">
+            <span class="input-group-addon">Username</span>
+            <input id="userName" type="text" value="test-user" class="form-control">
+          </div><br/>
+          <div class="input-group">
+            <span class="input-group-addon">Password&nbsp;</span>
+            <input id="password" type="password" value="abc" class="form-control">
+          </div></br>
+          <div class="btn-group">
+            <button type="button" id="login" class="btn btn-default">Login</button>
+          </div>
         </div>
-        <div/>
+      </div>
+      <div id="channels" class="box" style="display:none;">
+        <h1>Avalible channels</h1>
+        <ul id="channelsList" class="list-group"></ul>
+      </div>
+      <div style="display:none;" id="loggedZone" class="box">
+        <h1>Create channel</h1>
+        <div class="wrap">
+          <div class="input-group">
+            <span class="input-group-addon">Name&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <input type="text" id="name" class="form-control">
+          </div><br/>
+          <div class="input-group">
+            <span class="input-group-addon">Max players</span>
+            <input type="text" id="capacity" class="form-control">
+          </div></br>
+          <div class="input-group">
+            <span class="input-group-addon">Password&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <input type="text" id="cpassword" class="form-control">
+          </div><br/>
+          <div class="btn-group">
+            <button type="button" id="createChannel" class="btn btn-default">Create</button>
+            <button type="button" id="listChannels"  class="btn btn-default">Refresh</button>
+          </div>
+        </div>
+      </div>
+      <div/>
 </form>
 </body>
 </html>

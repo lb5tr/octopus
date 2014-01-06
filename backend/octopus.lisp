@@ -18,12 +18,12 @@
 
 (defun get-user-from-database (user-data)
   (with-transaction
-      (select-instance (u user)
-                       (where (and
-                               (string= (username-of u)
-                                        (username-of user-data))
-                               (string= (password-hash-of u)
-                                        (password-hash-of user-data)))))))
+    (select-instance (u user)
+      (where (and
+              (string= (username-of u)
+                       (username-of user-data))
+              (string= (password-hash-of u)
+                       (password-hash-of user-data)))))))
 
 (defun ensure-unique-channel (channel-name)
   (not (gethash channel-name (channels-of *server*))))
@@ -49,7 +49,7 @@
          (balli (ball-instance-of channel)))
     (setf (ball-instance-of channel) (next-position balli))
     (collision-between (ball-instance-of channel) (loop for user being the hash-values in users collect user
-))
+                                                       ))
     (make-instance 'game-state :players users-positions :ball-instance balli)))
 
 (defun make-state-broadcast (chan)
@@ -121,7 +121,7 @@
 (def auth-handler join-channel (channel-data uid client)
   (let* ((user (get-user *server* uid :users-by 'users-by-uid-of))
          (channel-name (name-of channel-data))
-         (channel(get-channel *server* channel-name))
+         (channel (get-channel *server* channel-name))
          (players-count (players-count-of channel))
          (players (users-of channel))
          (capacity (capacity-of channel))

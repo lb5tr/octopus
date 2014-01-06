@@ -13,10 +13,6 @@ $(document).ready(function ( ) {
         logout(UID);
     });
 
-    $('#connect').click( function () {
-        initWebSockets();
-    });
-
     $('#createChannel').click( function () {
         createChannel();
     });
@@ -25,16 +21,21 @@ $(document).ready(function ( ) {
         listChannels();
     });
 
+    $("#error").click ( function () {
+        $("#error").fadeOut();
+    });
+
+    $("#logo").fadeIn();
+    $("#loginBox").fadeIn();
+    initWebSockets();
 });
 
 function initWebSockets()
 {
-    socket = new WebSocket($("#address").val());
+    socket = new WebSocket("ws://127.0.0.1:7878/channel-manager");
     socket.onmessage = function (msg){
         dispatch(msg.data);
     };
-
-    $("#log").html("OK");
 }
 
 function createChannel()
@@ -79,7 +80,7 @@ function joinChannel()
         messageType: "join",
         uid : UID,
         payload : {
-            name : this.name
+            name : this.id
         }
     };
 
@@ -88,7 +89,7 @@ function joinChannel()
 
 function hideMenu()
 {
-    $("#menu").css("display", "none");  
+    $("#menu").css("display", "none");
 }
 
 function showGame()
@@ -121,8 +122,12 @@ function dispatch (data)
     }
     else
     {
-        $("#log").html("Failed!</br>Description: " + obj.payload.errorDescription);
-    }   
+
+        $("#error").html("Error:" + obj.payload.errorDescription);
+        $("#error").fadeIn();
+        setTimeout(function () { $("#error").fadeOut();}, 1600);
+        //        $("#log").html("Failed!</br>Description: " + obj.payload.errorDescription);
+    }
 }
 
 function connectChannel(locator)
@@ -148,7 +153,10 @@ function afterLogout(p)
 function afterLogin(p)
 {
     UID = p;
-    $("#loggedZone").css("display", "block");
+    $("#loginBox").fadeOut(function() {
+        $("#loggedZone").fadeIn();
+        $("#channels").fadeIn();
+    });
     listChannels();
 }
 
@@ -193,7 +201,16 @@ function afterList(channels)
     for (var key in channels)
     {
         var name = channels[key].name;
-        $("#channelsList").append('<a class="channelLink" name="'+name+'">'+name+'</a></br>');
+        var li = '<li class="list-group-item channelLink" id="'+name+'" style="color:black;">'
+            +name
+            + '<span class="badge">'+channels[key].playersCount + '/' + channels[key].capacity + '</span>';
+
+        if (channels[key].protected){
+            li += '<span class="badge"><span class="glyphicon glyphicon-lock"></span></span>';
+        }
+
+        $("#channelsList").append(li);
+
     }
     $(".channelLink").click(joinChannel);
 }
