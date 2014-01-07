@@ -1,0 +1,36 @@
+body
+{
+    color: #efe;
+    background-color: #000;
+    background-image: url('logo.png');
+    background-repeat: no-repeat;
+    background-attachment:fixed;
+    background-position: right;
+}
+
+.box
+{
+    margin: 40px;
+    width: 700px;
+    background-color: #111;
+    padding: 40px;
+}
+
+.wrap
+{
+    width: 400px;
+}
+
+#loginBox
+{
+    display:none;
+}
+
+#error
+{
+    width: 700px;
+    margin: 40px;
+    padding: 20px;
+    text-align: center;
+    display: none;
+}
