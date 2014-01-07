@@ -1,20 +1,5 @@
 (in-package :octopus)
 
-(defun draw (balls)
-  (pal:with-pal (:width 700 :height 350 :title "papiez")
-    (pal:event-loop ()
-      (pal:clear-screen (make-instance 'pal:color))
-      (setf balls (next-state balls))
-      (mapcar 'draw-ball balls)
-      (sleep 1/30))))
-
-(defun draw-ball (ball)
-  ;(format t "~A ~A~%" (getf (direction-of ball) :y) (y-of ball))
-  (pal:draw-circle (pal:v (ceiling (getf (position-of ball) :x))
-                          (ceiling (getf (position-of ball) :y)))
-                   (radius-of ball)
-                   255 255 255 255))
-
 (defun next-state (balls)
   (mapcar (lambda (b) (collision-between b balls)) (mapcar 'next-position balls)))
 

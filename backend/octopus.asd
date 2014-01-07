@@ -16,7 +16,6 @@
      :hu.dwim.perec.postgresql
      :cl-json
      :ironclad
-     :pal
      :closer-mop
      :fiveam
      :log5
