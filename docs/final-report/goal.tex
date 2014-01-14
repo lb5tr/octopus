@@ -1,0 +1,33 @@
+%TODO: fix urls
+\section{Cel i zakres prac}
+Przed rozpoczęciem pracy przyjęto, że:
+\begin{itemize}\itemsep0em
+  \item Gra ma umożliwiać wiele rozgrywek na raz (tzw. kanały gry).
+  \item Rozgrywkę można rozpocząć jedynie po uprzedniej rejestracji użytkownika.
+  \item Kanały gry mogą być chronione hasłem.
+  \item Podczas jednej rozgrywki można jednocześnie grać co najwyżej w szóstkę.
+  \item Interfejs użytkownika zostanie zaimplementowany w postaci asynchronicznej strony WWW z wykorzystaniem technologii HTML5\footnote{http://www.w3.org/TR/html5/} (canvas, WebSockets).
+  \item Część serwerowa (\emph{backend}) zostanie zaimplementowa korzystając z języka \emph{Common Lisp} w implementacji Steel Bank Common Lisp\footnote{http://www.sbcl.org/}.
+\end{itemize}
+Dodtkowo, ze względu na ograniczony czas przyjęto, że:
+\begin{itemize}
+  \item W przeciwieństwie do HaxBall, gracze, nie mogą wymieniać się wiadomościami podczas rozgrywki.
+  \item Brak tzn. \emph{lobby} czyli poczekalni dla graczy przed ukończeniem rundy - gracz jest umieszczany odrazu w centru rozgrywki.
+\end{itemize}
+
+Ze względu na widoczny podział projektu na dwie duże cześci - interfejs użytkownika(\emph{frontend}) i część serwerową (\emph{backend}) podział prac był dość łatwy. Tabela \ref{tab:podzial} przedstawia przydział prac poszczególnym członką grupy.
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{ |l|c| }
+    \hline
+    Osoba & Zakres prac i obowiązków \\ \hline
+    Bujok Mikołaj & stuff \\
+    Kubiak Jakub & stuff \\
+    Miękus Szymon & stuff \\
+    Nikodem Adrian & stuff \\
+    \hline
+  \end{tabular}
+  \caption{Przydział prac poszczególnym członkom zespołu}
+  \label{tab:podzial}
+\end{table}
