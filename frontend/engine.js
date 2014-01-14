@@ -6,7 +6,7 @@ function sendEvent(ev)
 {
     lastWas = "sendEvent";
     msg = {messageType : "event", uid: UID, payload: { eventType: ev }};
-    setTimeout(socket.send(JSON.stringify(msg)), 1/30);
+    setTimeout(socket.send(JSON.stringify(msg)), 1000/3);
 }
 
 function afterSendEvent(data)
@@ -24,6 +24,7 @@ function PlayState() {
         if(jaws.pressed("right d")) { sendEvent("right"); }
         if(jaws.pressed("up w"))    { sendEvent("up"); }
         if(jaws.pressed("down s"))  { sendEvent("down"); }
+        if(jaws.pressed("space")) { sendEvent("kick"); }
     }
 
     this.draw = function() {
@@ -32,9 +33,12 @@ function PlayState() {
         if (currentState){
             for (var i=0;i<currentState.players.length; i++)
             {
-                jaws.context.drawImage(jaws.assets.get("bullet.png"), currentState.players[i][1]-5, currentState.players[i][3]-5);
+                jaws.context.drawImage(jaws.assets.get("player-blue.png"), currentState.players[i][1][1]-22, currentState.players[i][1][3]-22);
             }
-            jaws.context.drawImage(jaws.assets.get("ball.png"), currentState.ballInstance.position[1]-currentState.ballInstance.radius, currentState.ballInstance.position[3]-currentState.ballInstance.radius);
+
+            jaws.context.drawImage(jaws.assets.get("ball.png"), currentState.ballInstance.position[1]-22, currentState.ballInstance.position[3]-22);
+
+
         }
     }
 
@@ -48,11 +52,10 @@ function PlayState() {
         if(item.y < 0)                  { item.y = 0 }
         if(item.y + item.height > jaws.height)  { item.y = jaws.height - item.height }
     }
-
 }
 /*
  *
- * MenuState is our lobby/welcome menu were gamer can chose start, high score and settings.
+ * MenuStatex is our lobby/welcome menu were gamer can chose start, high score and settings.
  * For this example we have only implemented start. Start switches active game state by simply:
  *   jaws.switchGameState(play)   (jaws.switchGameState(PlayState) would have worked too)
  *
@@ -92,7 +95,7 @@ function startGame(socket) {
 
     jaws.assets.add("plane.png");
     jaws.assets.add("field.png");
-    jaws.assets.add("bullet.png");
+    jaws.assets.add("player-blue.png");
     jaws.assets.add("ball.png");
     jaws.start(PlayState);
 }

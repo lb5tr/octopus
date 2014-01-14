@@ -45,11 +45,13 @@
 (defun generate-new-state (channel)
   (let* ((users (users-of channel))
          (users-positions (loop for user being the hash-values in users collect
-                               (position-of user)))
+                               (progn
+                                 (setf (gethash (uid-of user)
+                                                (users-of channel)) (next-position user))
+                                 `(:pos ,(position-of user)))))
          (balli (ball-instance-of channel)))
     (setf (ball-instance-of channel) (next-position balli))
-    (collision-between (ball-instance-of channel) (loop for user being the hash-values in users collect user
-                                                       ))
+    (collision-between (ball-instance-of channel) (loop for user being the hash-values in users collect user))
     (make-instance 'game-state :players users-positions :ball-instance balli)))
 
 (defun make-state-broadcast (chan)
@@ -152,8 +154,7 @@
               (log-as :info "User ~A joining ~A" (username-of user) channel-name)
               (setf (channel-of user) channel
                     (gethash uid players) user
-                    (players-count-of channel) (incf players-count)
-                    (radius-of user) 5)
+                    (players-count-of channel) (incf players-count))
               (introduce-new-user channel user)
               (return-from handler `(:message-type :ok :payload ,channel)))
             (return-from handler '(:message-type :error :error-type full-channel)))
@@ -177,6 +178,12 @@
                                               :error-code (assoc-cdr error-type
                                                                      *error-codes*)
                                               :error-description error-type)))))
+
+(defun try-kick (ball player)
+  (if (<= (distance-between ball player) (+ *ball-radius* *player-radius* *kick-offset*))
+      (setf (direction-of ball) (direction-of player)
+            (v-of ball) 4)))
+
 ;;TODO: remove duplications
 (def auth-handler handle-player-event (event uid client)
   (let* ((player (get-user *server* uid :users-by 'users-by-uid-of))
@@ -185,15 +192,29 @@
          (event-type (event-type-of event)))
     (with-lock-held ((lock-of channel))
       (cond
-        ((string= event-type "left") (setf (position-of player)
-                                           (add-vectors position '(:x -3 :y  0))))
-        ((string= event-type "right")(setf (position-of player)
-                                           (add-vectors position '(:x 3 :y  0))))
-        ((string= event-type "up")   (setf (position-of player)
-                                           (add-vectors position '(:x  0 :y -3))))
-        ((string= event-type "down") (setf (position-of player)
-                                           (add-vectors position '(:x  0 :y  3))))))
+        ((string= event-type-of "kick") (try-to-kick (ball-of channel) kick))
+        ((string= event-type "left") (progn
+                                        (decf (rof-of player)  0.5)
+                                        (setf (direction-of player)
+                                              (root-of-unity (rof-of player)))))
+        ((string= event-type "right") (progn
+                                        (incf (rof-of player) 0.5)
+                                        (setf (direction-of player)
+                                              (root-of-unity (rof-of player)))))
+        ((string= event-type "up")   (setf (v-of player) (min 6 (+ (v-of player) 0.5))))
+        ((string= event-type "down") (setf (v-of player) (max -6 (- (v-of player) 0.5))))))
     '(:message-type :ok)))
+
+
+;(defun ensure-no-collisions (et player channel)
+;  (cond
+;    ((string= event-type "left")  (check-for-collisons player channel '(:x -3 :y  0))))
+;    ((string= event-type "right") (check-for-collisons player channel '(:x 3 :y  0))))
+;    ((string= event-type "up")    (check-for-collisons player channel '(:x  0 :y -3))))
+;    ((string= event-type "down")  (check-for-collisons player channel '(:x  0 :y  3))))))
+
+;(defun check-for-collisons (p c offset)
+
 
 ;;client message mapping
 (defparameter *message-type-alist*

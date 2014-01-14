@@ -25,8 +25,9 @@
 (def class* ball ()
   ((position (list :x 350 :y 175) :type list)
    (v 4 :type integer)
+   (rof 0)
    (direction (root-of-unity 0) :type list)
-   (radius 21 :type integer)))
+   (radius 22 :type integer)))
 
 (def class* user-v (ball)
   ((username nil :type string)
