@@ -1,3 +1,4 @@
+(sb-ext:restrict-compiler-policy 'debug 3)
 (in-package #:cl-user)
 
 (defpackage #:octopus-system

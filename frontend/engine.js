@@ -1,3 +1,4 @@
+
 gameSocket = null
 currentState = null
 player = null;
@@ -33,7 +34,24 @@ function PlayState() {
         if (currentState){
             for (var i=0;i<currentState.players.length; i++)
             {
-                jaws.context.drawImage(jaws.assets.get("player-blue.png"), currentState.players[i][1][1]-22, currentState.players[i][1][3]-22);
+                sprt = new jaws.Sprite({image: 'player-blue.png', x: currentState.players[i][1][1], y:currentState.players[i][1][3], anchor: "center"});
+
+                x = currentState.players[i][3][1];
+
+                y = currentState.players[i][3][3];
+                angle  =Math.acos(x) * 180/3.14;
+
+                //console.log(angle + ' ' + x + ' ' + y);
+                if (y < 0 ){
+                    sprt.rotateTo(360 - angle);
+                }else
+                {
+                    sprt.rotateTo(angle);
+                }
+//                console.log(currentState.players[i][3] + ' ' +Math.acos(currentState.players[i][3])*180/3.14)
+                sprt.draw();
+
+//                jaws.context.drawImage(jaws.assets.get("player-blue.png"), currentState.players[i][1][1]-22, currentState.players[i][1][3]-22);
             }
 
             jaws.context.drawImage(jaws.assets.get("ball.png"), currentState.ballInstance.position[1]-22, currentState.ballInstance.position[3]-22);
@@ -80,7 +98,7 @@ function MenuState() {
             jaws.context.fillStyle =  (i == index) ? "Red" : "Black"
             jaws.context.strokeStyle =  "rgba(200,200,200,0.0)"
             jaws.context.fillText(items[i], 30, 100 + i * 60)
-        }  
+        }
     }
 }
 

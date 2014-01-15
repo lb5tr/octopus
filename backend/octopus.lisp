@@ -42,17 +42,42 @@
 (defun undefined-command (payload uid client)
   (response-with :message-type :error :error-type 'undefined-message-type))
 
+(defun in-range (p tp)
+  (let* ((a (getf tp :a))
+         (b (getf tp :b))
+         (x1 (getf a :x))
+         (y1 (getf a :y))
+         (x2 (getf b :x))
+         (y2 (getf b :y))
+         (mx (getf p :x))
+         (my (getf p :y)))
+    (and (> mx x1) (> my y1)
+             (< mx x2) (> my y2))))
+
+(defun check-for-score (ball)
+  (with-slots ((scor score) (pos position)) ball
+    (if (in-range pos '(:a (:x 0 :y 300) :b (:x 0 :y 400)))
+        (setf scor (cons (+ (car scor) 1) (cdr scor))))
+    (if (in-range pos '(:a (:x 650 :y 300) :b (:x 700 :y 400)))
+        (setf scor (cons (car scor) (+ (cdr scor) 1)))))
+  ball)
+
 (defun generate-new-state (channel)
   (let* ((users (users-of channel))
-         (users-positions (loop for user being the hash-values in users collect
+         (users-list (loop for user being the hash-values in users collect user))
+         (users-positions nil)
+         (balli (ball-instance-of channel))
+         (score (score-of channel)))
+         (collision-between (ball-instance-of channel) users-list)
+        (maphash (lambda (x y) (collision-between y `(,balli) :mangle-first nil)) users)
+    (setf (ball-instance-of channel) (next-position balli users-list))
+    (check-for-score balli)
+    (setf users-positions (loop for user being the hash-values in users collect
                                (progn
                                  (setf (gethash (uid-of user)
-                                                (users-of channel)) (next-position user))
-                                 `(:pos ,(position-of user)))))
-         (balli (ball-instance-of channel)))
-    (setf (ball-instance-of channel) (next-position balli))
-    (collision-between (ball-instance-of channel) (loop for user being the hash-values in users collect user))
-    (make-instance 'game-state :players users-positions :ball-instance balli)))
+                                                (users-of channel)) (next-position user users-list))
+                                 `(:pos ,(position-of user) :rotation ,(direction-of user)))))
+    (make-instance 'game-state :players users-positions :ball-instance balli :score-yellow (car score) :score-blue (cdr score))))
 
 (defun make-state-broadcast (chan)
   (lambda ()
@@ -179,10 +204,12 @@
                                                                      *error-codes*)
                                               :error-description error-type)))))
 
-(defun try-kick (ball player)
-  (if (<= (distance-between ball player) (+ *ball-radius* *player-radius* *kick-offset*))
-      (setf (direction-of ball) (direction-of player)
-            (v-of ball) 4)))
+(defun try-to-kick (ball player)
+  (let ((dd (direction-of player)))
+    (if (<= (distance-between ball player) (+ *ball-radius* *player-radius* *kick-offset*))
+        (progn
+          (setf (direction-of ball) dd)
+          (v-of ball) 100))))
 
 ;;TODO: remove duplications
 (def auth-handler handle-player-event (event uid client)
@@ -192,7 +219,7 @@
          (event-type (event-type-of event)))
     (with-lock-held ((lock-of channel))
       (cond
-        ((string= event-type-of "kick") (try-to-kick (ball-of channel) kick))
+        ((string= event-type "kick") (try-to-kick (ball-instance-of channel) player))
         ((string= event-type "left") (progn
                                         (decf (rof-of player)  0.5)
                                         (setf (direction-of player)
@@ -223,6 +250,7 @@
     ("logout" . logout)
     ("list" . list-channels)
     ("create" . create-channel)
+    ("get-channel" . get-channel)
     ("join" . join-channel)
     ("event" . handle-player-event)))
 

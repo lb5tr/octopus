@@ -54,6 +54,8 @@
 
 (def class* game-state ()
   ((players)
+   (score-yellow 0)
+   (score-blue 0)
    (ball-instance :type ball)))
 
 (def class* channel ()
@@ -62,6 +64,7 @@
    (users (make-hash-table :test #'equal) :type hash-table)
    (map nil :type string)
    (admin-id nil :type string)
+   (score '(0 . 0))
    (capacity :type integer)
    (ball-instance (make-instance 'ball) :type ball)
    (players-count 0 :type integer)
@@ -72,7 +75,7 @@
    (state-broadcast nil)
    (lock (make-lock)))
   (:metaclass selective-serialization-class)
-  (:ommit-when-serializing password-hash admin-id
+  (:ommit-when-serializing password-hash admin-id score
                            lock state-broadcast listener))
 
 (override-json-serialization channel)
