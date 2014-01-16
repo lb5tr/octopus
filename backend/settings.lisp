@@ -35,13 +35,14 @@
     (invalid-name . 6)
     (user-already-at-channel . 7)
     (no-such-channel . 8)
-    (full-channel . 9)))
+    (full-channel . 9)
+    (wrong-password . 10)))
 
 ;others
 (defparameter *default-digest* 'sha1)
 (defparameter *width* 700)
 (defparameter *height* 350)
-(defparameter *rate* 1/25)
+(defparameter *rate* 1/30)
 (defparameter *ball-radius* 22)
 (defparameter *kick-offset* 5)
 (defparameter *player-radius* 22)

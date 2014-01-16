@@ -137,10 +137,11 @@
                   (channel-locator-of channel-data) channel-name)
             (unless (emptyp password)
               (setf (protected-of channel-data) t))
-            (setf (listener-of channel-data) (start-ws-resource (concatenate 'string "/" channel-name)
-                                                                '("")
-                                                                'channel-resource
-                                                                channel-name)
+;            (setf (listener-of channel-data) (start-ws-resource (concatenate 'string "/" channel-name)
+ ;                                                               '("")
+  ;                                                              'channel-resource
+;                                                             channel-name)
+            (setf
                   (state-broadcast-of channel-data) (make-thread (make-state-broadcast channel-data))
                   (capacity-of channel-data) (parse-integer (capacity-of channel-data))
                   (ball-instance-of channel-data) (make-instance 'ball))
@@ -202,8 +203,13 @@
          (channel (get-channel *server* channel-name))
          (players-count (players-count-of channel))
          (players (users-of channel))
+         (given-password (password-hash-of channel-data))
+         (channel-hash (password-hash-of channel))
          (capacity (capacity-of channel))
+         (protectedp (protected-of channel))
          (lock (lock-of channel)))
+    (if (and protectedp (not (string= given-password channel-hash)))
+        (return-from handler '(:message-type :error :error-type wrong-password)))
     (if channel
         (if (< players-count capacity)
             (with-lock-held (lock)

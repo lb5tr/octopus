@@ -2,6 +2,8 @@ var socket = null;
 var channelSocket = null;
 var UID = null;
 var lastWas = null;
+var protectedJoinAttempt = null;
+
 
 $(document).ready(function ( ) {
 
@@ -25,6 +27,10 @@ $(document).ready(function ( ) {
         $("#error").fadeOut();
     });
 
+    $("#joinProtectedChannel").click ( function () {
+        joinProtectedChannel();
+    });
+
     $("#logo").fadeIn();
     $("#loginBox").fadeIn();
     initWebSockets();
@@ -32,7 +38,7 @@ $(document).ready(function ( ) {
 
 function initWebSockets()
 {
-    socket = new WebSocket("ws://127.0.0.1:7878/channel-manager");
+    socket = new WebSocket("ws://octopus.lan:7878/channel-manager");
     socket.onmessage = function (msg){
         dispatch(msg.data);
     };
@@ -73,8 +79,31 @@ function login(username, password)
     socket.send(JSON.stringify(msg));
 }
 
+function joinProtectedChannel()
+{
+    lastWas = "joinChannel";
+    msg = {
+        messageType: "join",
+        uid : UID,
+        payload : {
+            name : protectedJoinAttempt,
+            passwordHash: CryptoJS.SHA1($("#protectedChannelPassword").val()) + ''
+        }
+    };
+
+    socket.send(JSON.stringify(msg));
+}
+
 function joinChannel()
 {
+    if ($(this).html().indexOf('span class="glyphicon glyphicon-lock"></span></span>') > -1)
+    {
+        //password
+        protectedJoinAttempt = this.id;
+        $("#dialog").slideDown();
+        return;
+    }
+
     lastWas = "joinChannel";
     msg = {
         messageType: "join",
@@ -137,6 +166,11 @@ function connectChannel(locator)
 
 function afterJoinChannel(channel)
 {
+    if (protectedJoinAttempt != null)
+    {
+        protectedJoinAttempt = null;
+        $("#dialog").slideUp();
+    }
     console.log(channel.channelLocator);
     var gameSocket = connectChannel(channel.channelLocator);
     $("#channelName").html('Channel: ' + channel.name);
@@ -210,7 +244,7 @@ function afterList(channels)
             li += '<span class="badge"><span class="glyphicon glyphicon-lock"></span></span>';
         }
 
-        $("#channelsList").append(li);
+        $("#channelsList").append(li+'</li>');
 
     }
     $(".channelLink").click(joinChannel);
