@@ -51,18 +51,32 @@
          (y2 (getf b :y))
          (mx (getf p :x))
          (my (getf p :y)))
-    (and (> mx x1) (> my y1)
-             (< mx x2) (> my y2))))
+    (and (>= mx x1) (>= my y1)
+             (<= mx x2) (<= my y2))))
 
-(defun check-for-score (ball)
-  (with-slots ((scor score) (pos position)) ball
-    (if (in-range pos '(:a (:x 0 :y 300) :b (:x 0 :y 400)))
-        (setf scor (cons (+ (car scor) 1) (cdr scor))))
-    (if (in-range pos '(:a (:x 650 :y 300) :b (:x 700 :y 400)))
-        (setf scor (cons (car scor) (+ (cdr scor) 1)))))
-  ball)
+(defun check-for-score (ball channel)
+  (with-slots ((scor score)) channel
+    (with-slots ((pos position) (r radius)) ball
+      (if (in-range pos `(:a (:x ,r :y 125) :b (:x ,(+ r 1) :y 225)))
+          (progn
+            (setf scor (cons (+ (car scor) 1) (cdr scor)))
+            t)
+          (if (in-range pos `(:a (:x ,(- 700 r 1) :y 125) :b (:x ,(- 700 r) :y 225)))
+              (progn
+                (setf scor (cons (car scor) (+ 1 (cdr scor))))
+                t)
+              nil)))))
+
+(defun reset-positions (channel)
+  (with-slots ((bi ball-instance) (us users)) channel
+    (maphash (lambda (key user) (setf (position-of user) (starting-postion-of user))) us)
+    (with-slots ((pos position) (vel v)) bi
+        (setf pos '(:x 350 :y 175)
+              vel 0))))
 
 (defun generate-new-state (channel)
+  (when (check-for-score (ball-instance-of channel) channel)
+    (reset-positions channel))
   (let* ((users (users-of channel))
          (users-list (loop for user being the hash-values in users collect user))
          (users-positions nil)
@@ -70,13 +84,13 @@
          (score (score-of channel)))
          (collision-between (ball-instance-of channel) users-list)
         (maphash (lambda (x y) (collision-between y `(,balli) :mangle-first nil)) users)
+      ;  (mapcar (lambda (x) (collision-between x users-list)) users-list)
     (setf (ball-instance-of channel) (next-position balli users-list))
-    (check-for-score balli)
     (setf users-positions (loop for user being the hash-values in users collect
                                (progn
                                  (setf (gethash (uid-of user)
                                                 (users-of channel)) (next-position user users-list))
-                                 `(:pos ,(position-of user) :rotation ,(direction-of user)))))
+                                 `(:pos ,(position-of user) :rotation ,(direction-of user) :team ,(team-of user) :name ,(username-of user)))))
     (make-instance 'game-state :players users-positions :ball-instance balli :score-yellow (car score) :score-blue (cdr score))))
 
 (defun make-state-broadcast (chan)
@@ -135,10 +149,23 @@
           `(:message-type :error :error-type ,code)))))
 
 (defun introduce-new-user (channel user)
-  (find-suitable-place-for user channel))
+  (with-slots ((pc players-count)) channel
+    (with-slots ((tea team)) user
+      (if (oddp pc)
+          (progn
+            (setf tea 'blue)
+            (incf (blue-team-count-of channel)))
+          (progn
+            (setf tea 'yellow)
+            (setf (direction-of user) '(:x -1 :y 0 ))
+            (incf (yellow-team-count-of channel))))
+      (find-suitable-place-for user channel tea))))
 
-(defun find-suitable-place-for (user channel)
-  (setf (position-of user) '(:x 200 :y 200)))
+(defun find-suitable-place-for (user channel team)
+  (setf (starting-postion-of user) (cond
+                                     ((equal team 'yellow) `(:x 450 :y ,(* (yellow-team-count-of channel) 50)))
+                                      ((equal team 'blue)  `(:x 250 :y ,(* (blue-team-count-of channel) 50)))))
+  (setf (position-of user) (starting-postion-of user)))
 
 (defun find-user-by-socket (client)
   (block outter
@@ -155,6 +182,10 @@
       (decf (players-count-of channel)))))
 
 (defun leave-server (user)
+  (with-slots ((ch channel)) user
+    (cond
+      ((equal (team-of user) 'blue) (decf (blue-team-count-of ch)))
+      ((equal (team-of user) 'yellow) (decf (yellow-team-count-of ch)))))
   (remhash (uid-of user) (users-by-uid-of *server*))
   (remhash (username-of user) (users-by-username-of *server*)))
 
@@ -209,7 +240,7 @@
     (if (<= (distance-between ball player) (+ *ball-radius* *player-radius* *kick-offset*))
         (progn
           (setf (direction-of ball) dd)
-          (v-of ball) 100))))
+          (v-of ball) 10))))
 
 ;;TODO: remove duplications
 (def auth-handler handle-player-event (event uid client)

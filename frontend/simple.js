@@ -139,6 +139,7 @@ function afterJoinChannel(channel)
 {
     console.log(channel.channelLocator);
     var gameSocket = connectChannel(channel.channelLocator);
+    $("#channelName").html('Channel: ' + channel.name);
     hideMenu();
     showGame();
     startGame(gameSocket);

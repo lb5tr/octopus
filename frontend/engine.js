@@ -3,6 +3,8 @@ gameSocket = null
 currentState = null
 player = null;
 
+score_sound = null;
+
 function sendEvent(ev)
 {
     lastWas = "sendEvent";
@@ -15,6 +17,11 @@ function afterSendEvent(data)
 }
 
 function PlayState() {
+    lastYellowScore = 0;
+    lastBlueScore = 0;
+    firstRun = true;
+
+
     this.setup = function() {
         jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
         jaws.preventDefaultKeys(["up", "down", "left", "right", "space"])
@@ -31,15 +38,39 @@ function PlayState() {
     this.draw = function() {
         jaws.clear()
         jaws.context.drawImage(jaws.assets.get("field.png"), 0, 0);
+
+
         if (currentState){
+            if (firstRun)
+            {
+                lastBlueScore = currentState.scoreBlue;
+                lastYellowScore = currentState.scoreYellow;
+                firstRun = false;
+            }
+
+            if (lastBlueScore != currentState.scoreBlue)
+            {
+                score_sound.play();
+                lastBlueScore++;
+            }
+
+            if (lastYellowScore != currentState.scoreYellow)
+            {
+                score_sound.play();
+                lastYellowScore++;
+            }
+            $('#bluePlayers').html('');
+            $('#yellowPlayers').html('');
+            $('#score').html("<h3>" + lastBlueScore + ' : ' +lastYellowScore + "</h3>");
             for (var i=0;i<currentState.players.length; i++)
             {
-                sprt = new jaws.Sprite({image: 'player-blue.png', x: currentState.players[i][1][1], y:currentState.players[i][1][3], anchor: "center"});
+                sprt = new jaws.Sprite({image: 'player-'+currentState.players[i][5]+'.png', x: currentState.players[i][1][1], y:currentState.players[i][1][3], anchor: "center"});
 
                 x = currentState.players[i][3][1];
-
                 y = currentState.players[i][3][3];
-                angle  =Math.acos(x) * 180/3.14;
+                angle = Math.acos(x) * 180/3.14;
+
+                $('#' + currentState.players[i][5] + 'Players').append('<li class="list-group-item"  style="color:black;">'+currentState.players[i][7]+'</li>');
 
                 //console.log(angle + ' ' + x + ' ' + y);
                 if (y < 0 ){
@@ -48,10 +79,10 @@ function PlayState() {
                 {
                     sprt.rotateTo(angle);
                 }
-//                console.log(currentState.players[i][3] + ' ' +Math.acos(currentState.players[i][3])*180/3.14)
+                //                console.log(currentState.players[i][3] + ' ' +Math.acos(currentState.players[i][3])*180/3.14)
                 sprt.draw();
 
-//                jaws.context.drawImage(jaws.assets.get("player-blue.png"), currentState.players[i][1][1]-22, currentState.players[i][1][3]-22);
+                //                jaws.context.drawImage(jaws.assets.get("player-blue.png"), currentState.players[i][1][1]-22, currentState.players[i][1][3]-22);
             }
 
             jaws.context.drawImage(jaws.assets.get("ball.png"), currentState.ballInstance.position[1]-22, currentState.ballInstance.position[3]-22);
@@ -110,10 +141,12 @@ function startGame(socket) {
     gameSocket = socket;
 
     socket.onmessage = function (msg) { stateUpdate(msg.data); };
-
+    score_sound = new Audio("score.mp3");
+    score_sound.play();
     jaws.assets.add("plane.png");
     jaws.assets.add("field.png");
     jaws.assets.add("player-blue.png");
+    jaws.assets.add("player-yellow.png");
     jaws.assets.add("ball.png");
     jaws.start(PlayState);
 }

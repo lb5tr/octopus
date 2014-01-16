@@ -15,7 +15,19 @@
     <script src="engine.js"></script>
     <script src="simple.js"></script>
     <div id="game" style="display:none;">
-      <canvas width=700 height=350 id="canvas"><canvas>
+      <h1 id="channelName"></h1>
+      <h2 id="score"></h2>
+      <canvas width="700" height="350" id="canvas"></canvas>
+      <div id="playersAtChannel" style="width:700px;">
+        <div id="playersYellow" class="listContainer">
+          <h3>Yellow team</h3>
+          <ul id="yellowPlayers" class="list-group playersList"></ul>
+        </div>
+        <div id="playersBlue" class="listContainer">
+          <h3>Blue team</h3>
+          <ul id="bluePlayers" class="list-group playersList"></ul>
+        </div>
+      </div>
     </div>
     <div id="menu">
       <div class="alert alert-danger" id="error"></div>

@@ -8,6 +8,26 @@ body
     background-position: right;
 }
 
+#game
+{
+    width: 750px;
+    margin: 40px;
+}
+
+#canvas
+{
+    -moz-box-shadow: 0 0 5px #fff;
+    -webkit-box-shadow: 0 0 5px #fff;
+    box-shadow: 0px 0px 5px #fff;
+}
+
+#playersAtChannel
+{
+    margin: 15px;
+    width: 700px;
+    float: left;
+}
+
 .box
 {
     margin: 40px;
@@ -24,6 +44,18 @@ body
 #loginBox
 {
     display:none;
+}
+
+.listContainer
+{
+    width: 210px;
+    float: left;
+    display: inline;
+}
+
+.playersList
+{
+    width: 190px;
 }
 
 #error
