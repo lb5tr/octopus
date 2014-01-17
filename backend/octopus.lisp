@@ -16,6 +16,15 @@
 (defun ensure-user-exists-in-database (user-data)
   (get-user-from-database user-data))
 
+(defun ensure-username-not-taken (name)
+  (not (get-user-from-database-by-name name)))
+
+(defun get-user-from-database-by-name (name)
+  (with-transaction
+    (select-instance (u user)
+      (where (and
+              (string= (username-of u) name))))))
+
 (defun get-user-from-database (user-data)
   (with-transaction
     (select-instance (u user)
@@ -108,9 +117,9 @@
 (defun login (user-data uid client)
   (apply #'response-with
          (cond
-           ;; ((ensure-user-not-logged-in user-data)
-           ;;  (log-as info "user ~A already exists" (username-of user-data))
-           ;;  '(:message-type :error :error-type user-already-logged-in))
+           ((ensure-user-not-logged-in user-data)
+            (log-as info "user ~A already exists" (username-of user-data))
+            '(:message-type :error :error-type user-already-logged-in))
            ((not (ensure-user-exists-in-database user-data))
             (log-as info "no such user ~A" (username-of user-data))
             '(:message-type :error :error-type no-such-user))
@@ -269,6 +278,20 @@
         ((string= event-type "down") (setf (v-of player) (max -6 (- (v-of player) 0.5))))))
     '(:message-type :ok)))
 
+(defun create-new-user (name hash)
+  (with-transaction
+    (make-instance 'user :username name :password-hash hash)))
+
+(defun register (user uid client)
+  (apply 'response-with
+    (with-slots ((name username) (pass password-hash)) user
+        (if (ensure-username-not-taken name)
+          (if (or (emptyp name) (emptyp pass))
+              '(:message-type :error :error-type username-and-password-cannot-be-empty)
+              (progn
+                (create-new-user name (hash-string pass :digest *default-digest*))
+               '(:message-type :ok)))
+        '(:message-type :error :error-type username-taken)))))
 
 ;(defun ensure-no-collisions (et player channel)
 ;  (cond
@@ -279,12 +302,12 @@
 
 ;(defun check-for-collisons (p c offset)
 
-
 ;;client message mapping
 (defparameter *message-type-alist*
   '(("undefined" . undefined-command)
     ("login" . login)
     ("logout" . logout)
+    ("register" . register)
     ("list" . list-channels)
     ("create" . create-channel)
     ("get-channel" . get-channel)
@@ -295,6 +318,7 @@
 (defparameter *message-payload-alist*
   '((login . user-v)
     (logout . dummy)
+    (register . user-v)
     (undefined-command . dummy)
     (list-channels . dummy)
     (create-channel . channel)

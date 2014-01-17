@@ -8,6 +8,11 @@ body
     background-position: right;
 }
 
+#registrationBox
+{
+    display: none;
+}
+
 #game
 {
     width: 750px;

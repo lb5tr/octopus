@@ -19,6 +19,14 @@ $(document).ready(function ( ) {
         createChannel();
     });
 
+    $('#registrationLink').click( function () {
+        showRegisterBox();
+    });
+
+    $('#register').click (function () {
+        register();
+    });
+
     $('#listChannels').click( function () {
         listChannels();
     });
@@ -31,10 +39,35 @@ $(document).ready(function ( ) {
         joinProtectedChannel();
     });
 
+    setInterval(listChannels, 1000);
+
     $("#logo").fadeIn();
     $("#loginBox").fadeIn();
     initWebSockets();
 });
+
+function register()
+{
+    lastWas = "register";
+    name = $("#newUserName").val();
+    hash = $("#newUserPassword").val();
+
+    msg = {
+        messageType : "register",
+        uid : "null",
+        payload : {
+            username : name,
+            passwordHash : hash
+        }
+    };
+    socket.send(JSON.stringify(msg));
+}
+
+
+function showRegisterBox()
+{
+    $('#loginBox').fadeOut(function () {$("#registrationBox").fadeIn();})
+}
 
 function initWebSockets()
 {
@@ -141,6 +174,7 @@ function dispatch (data)
         case "listChannels": afterList(obj.payload); break;
         case "joinChannel": afterJoinChannel(obj.payload); break;
         case "sendEvent": afterSendEvent(obj.payload); break;
+        case "register": afterRegister(obj.payload); break;
         };
     }
     else
@@ -157,6 +191,12 @@ function dispatch (data)
         setTimeout(function () { $("#error").fadeOut();}, 1600);
         //        $("#log").html("Failed!</br>Description: " + obj.payload.errorDescription);
     }
+}
+
+function afterRegister(payload)
+{
+    $("#userName").val($("#newUserName").val());
+    $("#registrationBox").fadeOut(function () {$("#loginBox").fadeIn()});
 }
 
 function connectChannel(locator)

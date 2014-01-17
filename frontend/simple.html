@@ -31,6 +31,22 @@
     </div>
     <div id="menu">
       <div class="alert alert-danger" id="error"></div>
+      <div id="registrationBox" class="box">
+        <h1>Register new user</h1>
+        <div class="wrap">
+          <div class="input-group">
+            <span class="input-group-addon">Username</span>
+            <input id="newUserName" type="text" class="form-control">
+          </div><br/>
+          <div class="input-group">
+            <span class="input-group-addon">Password&nbsp;</span>
+            <input id="newUserPassword" type="password" class="form-control">
+          </div></br>
+          <div class="btn-group">
+            <button type="button" id="register" class="btn btn-default">Register</button>
+          </div>
+        </div>
+      </div>
       <div id="loginBox" class="box">
         <h1>Login</h1>
         <div class="wrap">
@@ -45,7 +61,8 @@
           <div class="btn-group">
             <button type="button" id="login" class="btn btn-default">Login</button>
           </div>
-        </div>
+        </div><br/>
+        <a href="#" id="registrationLink">New here? Register now!</a>
       </div>
       <div id="channels" class="box" style="display:none;">
         <h1>Available channels</h1>

@@ -36,7 +36,9 @@
     (user-already-at-channel . 7)
     (no-such-channel . 8)
     (full-channel . 9)
-    (wrong-password . 10)))
+    (wrong-password . 10)
+    (username-taken . 11)
+    (username-and-password-cannot-be-empty . 12)))
 
 ;others
 (defparameter *default-digest* 'sha1)
