@@ -1,1 +1,67 @@
 \section{Implementacja}
+Implementacja projektu, ze względu na rodzaj przedswięwzięcia został podzielona na dwie niezależne części.
+
+Część kliencka, wysyłająca zapytania, odbierająca odpowiedzi na zapytania oraz odbierająca stan gry. Część kliencka odpowiedziala jest również za rysowanie aktualnego stanu gry oraz interfejsu użytkownika.
+
+Część serwerowa wykonująca wszsytkie obliczenia, odbierająca zapytania, przetwarzająca je i rozyłąjąca je do użytkowników.
+
+W rozdziale tym przedstawiono również specyfikację protokołu wykorzystywanego do komunikacji między stacją klienta a serwerem.
+\subsection{Protokół komunikacyjny}
+
+Korzystając z aplikacji tworzonych z wykorzystaniem języka JavaScript, niesposób wykorzystać pełnie jego możliwości bez znajomości JSON. JSON jest notacją reprezentacji obiektów w języku, nietylko JavaScript, ale wszsytkich tych, które dostarczają możwliość obsługi tego standardu, który opiera się na prostym, hierarchicznym formacie tekstowym.
+
+Wsparcie dla JSON w języku JavaScript jest zapewninone dzięki bibliotece standardowej, w języku Common Lisp należy wykorzystać pakiet \emph{CL-JSON}.
+\begin{figure}[ht]
+    \centering
+    \begin{verbatim}
+      {
+        name : "Jan",
+        lastName : "Kowalski",
+        emails : [jan@kowalski.pl, janek@games.com],
+        pet :
+        {
+          name : "reksio"
+          species "C. Lupus"
+        }
+     }
+      \end{verbatim}
+    \caption{Przykładowa reprezentacja obiektu w formacie JSON}
+    \label{fig:jsonexample}
+\end{figure}
+W przypadku prostych protokołów, z łatwością można wykorzystać JSON w zastępswie za XML.
+
+
+\subsection{Model obiektowy}
+
+\subsection{Cześć serwerowa}
+Implementacja serwera, za sprawą wykorzystania języka Common Lisp została zaprogramowana korzystając z dwóch paradygmatów programowania. Funkcyjnym, za sprawą natury języka Lisp i obiektowym, za sprawą CLOS\footnote{\url{https://en.wikipedia.org/wiki/Common_Lisp_Object_System}}.
+
+Przepływ danych w funkcjach jest następujący:
+\begin{enumerate}
+\item Dane od klienta docierają do funkcji obsługującej dane przychodzące od klientów. Funkcja jest implementacją funkcji \emph{resource-received-text} interfejsu \emph{ws-resource}.
+\item Ponieważ wiadomość jest zserializowana do postaci tekstowej, zformatowaj do notacji JSON\footnote{\url{http://www.json.org/}}, należy ją zdeserializować korzystając z funkcji \emph{json-to-client-message}. W zależności od wartości pola \emph{messageType} wiadomość zostanie zserialowana do dane obiektu CLOS. Informacje o tym, jaki typ obiektu wybrać znajdują się w liście asocjacyjnej \emph{*message-payload-alist*}.
+\item Obiekt zwócony przez poprzednią funkcję trafia do funkcji \emph{dispatch-message}, która również w zależności od \emph{messageType} wywołuje odpowiednią funkcję obsługującą zapytanie.
+\item Funkcja obsługująca zapytanie zwraca tzn. listę własności (\emph{property list}) definiującą wynik obsługi zdażenia. Lista nasępnie trafia do funkcji \emph{response-with} która serializuje listę do obiektu \emph{server-message} definiującą rodzaj odpowiedzi, wynik lub ewentualny kod błędu w przypadku niepowodzenia.
+\item Obiekt jest następnie serializowana do JSON i wysyłana do klienta korzystając z funkcji \emph{write-to-client-text}.
+\end{enumerate}
+Rysunek \ref{fig:serverflow} wizualizuje proces przetwarzania zapytań przez serwer.
+
+Ponieważ serwer obsługuje szereg kanałów, jak i wielu użytkowników oraz oba te obiekty są zmienne w ilości, należy przechowywać je w kontenerach. Podstawowym kontenertem jest lista, jednak oczywiście złożoność dodawania, wyszukiwania oraz innych operacji ma zbyt wysoką złożoność. Aby rozwiązać ten problem wykorzystano strukturę tablicy haszującej dostępnej w bibliotece standardowej języka Common Lisp.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.5\textwidth]{imgs/serverflow.png}
+    \caption{Przepływ danych po stronie serwerowej aplikacji.}
+    \label{fig:serverflow}
+\end{figure}
+
+\subsection{Cześć kliencka}
+Strukura interfejsu użytkownika, zdefiniowana przy użyciu języka HTML, reaguje na akcje użytkownika kożystając z języka JavaScript. Funkcje obsługujące zdarzenia połączone są z przyciskami kożystając z biblioteki jQuery\footnote{\url{http://jquery.com/}}. Na uwagę zasługuje funkcja \emph{dispatch}, która jest wysyłana za każdym razem gdy dane są zwracane od serwera. Funkcja, w zależności od tego jaka funkcja zostałą wywołana przez interfejsa użytkownika, wywoła funkcję która obsługuje odpowiedź na zapytanie. Jeżeli serwer odpowie wiadomością sugerującą nie powdodzenie w realizacji rządania wysłąnego przez klienta, funkcja obsługująca odpowiedź nie zostanie wywołana, a jedynie zostanie przedstawiona wiadomość z opisem błędu na interfejsie użytownika.
+
+Rysunek \ref{fig:clientflow} prezentuje, jak wygląda proces przetwarzania akcji klienta.
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.6\textwidth]{imgs/clientflow.png}
+    \caption{Poszczególne aktywności generowane podczas przetwarzania danych klienta}
+    \label{fig:clientflow}
+\end{figure}
