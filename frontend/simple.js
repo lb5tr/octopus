@@ -243,19 +243,11 @@ function afterCreate(p)
 
 function logout(uid)
 {
-    lastWas = "logout";
-    if (uid == null){
-        alert('Not loged in!');
-        return;
-    }
-
-    msg = {
-        messageType : 'logout',
-        uid: uid
-    };
-
-    uid = null;
-    socket.send(JSON.stringify(msg));
+    $("#channels").fadeOut(function(){
+        $("#loggedZone").fadeOut(function(){
+            window.location.reload();
+        });
+    });
 }
 
 function listChannels()

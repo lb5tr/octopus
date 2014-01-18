@@ -255,7 +255,7 @@
     (if (<= (distance-between ball player) (+ *ball-radius* *player-radius* *kick-offset*))
         (progn
           (setf (direction-of ball) dd)
-          (v-of ball) 10))))
+          (v-of ball) 6))))
 
 ;;TODO: remove duplications
 (def auth-handler handle-player-event (event uid client)

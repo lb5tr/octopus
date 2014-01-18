@@ -6,11 +6,30 @@ Część kliencka, wysyłająca zapytania, odbierająca odpowiedzi na zapytania 
 Część serwerowa wykonująca wszsytkie obliczenia, odbierająca zapytania, przetwarzająca je i rozyłąjąca je do użytkowników.
 
 W rozdziale tym przedstawiono również specyfikację protokołu wykorzystywanego do komunikacji między stacją klienta a serwerem.
+
+\subsection{Model obiektowy}
+W ninejszym podrozdziale przedstawiono schemat obiektów zaimplementowany w aplikacji. Rysunek \ref{fig:main-obj} przedstawia diagram głównej część obkietów modelujących system, na rysunku \ref{fig:misc-obj} natomiast, pokazano obiekty, nie mające bezpośredniej relacji z główną częścią części serwerowej.
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{imgs/main-obj.png}
+    \caption{Diagram obiektów głównej części systemu.}
+    \label{fig:main-obj}
+\end{figure}
+
+\begin{figure}[ht]
+    \centering
+    \includegraphics[width=0.8\textwidth]{imgs/misc-obj.png}
+    \caption{Diagram pozostałych obiektów}
+    \label{fig:misc-obj}
+\end{figure}
+
+Ze względu na charakter działania części klienckiej, która nie przechowuje żadnego stanu, nie został zaimplementowanny żaden konkretny model obiektowy.
+
 \subsection{Protokół komunikacyjny}
 
 Korzystając z aplikacji tworzonych z wykorzystaniem języka JavaScript, niesposób wykorzystać pełnie jego możliwości bez znajomości JSON. JSON jest notacją reprezentacji obiektów w języku, nietylko JavaScript, ale wszsytkich tych, które dostarczają możwliość obsługi tego standardu, który opiera się na prostym, hierarchicznym formacie tekstowym.
 
-Wsparcie dla JSON w języku JavaScript jest zapewninone dzięki bibliotece standardowej, w języku Common Lisp należy wykorzystać pakiet \emph{CL-JSON}.
+Wsparcie dla JSON w języku JavaScript jest zapewninone dzięki bibliotece standardowej, w języku Common Lisp należy wykorzystać pakiet \emph{CL-JSON}. Rysunek \ref{fig:jsonexample} przedstawia przykładowy obiekt w notacji JSON.
 \begin{figure}[ht]
     \centering
     \begin{verbatim}
@@ -20,8 +39,9 @@ Wsparcie dla JSON w języku JavaScript jest zapewninone dzięki bibliotece stand
         emails : [jan@kowalski.pl, janek@games.com],
         pet :
         {
-          name : "reksio"
-          species "C. Lupus"
+          name : "reksio",
+          species "C. Lupus",
+          age: 4
         }
      }
       \end{verbatim}
@@ -30,8 +50,81 @@ Wsparcie dla JSON w języku JavaScript jest zapewninone dzięki bibliotece stand
 \end{figure}
 W przypadku prostych protokołów, z łatwością można wykorzystać JSON w zastępswie za XML.
 
+W przypadku zaimplementowanego projektu, komunikaty dzielą się na dwa typy:
+\begin{itemize}
+  \item Wiadomości klienta (\emph{client message}).
+  \item Wiadomości serwera (\emph{server message}).
+\end{itemize}
 
-\subsection{Model obiektowy}
+\subsubsection{Wiadomość klienta}
+Ogólna budowa rządania klienta została przedstawiona na rysunku \ref{fig:jsonclient}.
+\begin{figure}[ht]
+    \centering
+    \begin{verbatim}
+      {
+        userId: <<ID klienta lub NULL>>,
+        messageType: <<Rodzaj rządania>>,
+        payload: <<obiekt wymagany przez typ wiadomości>
+      }
+      \end{verbatim}
+    \caption{Reprezentacja obiektu zapytania klienta w notacji JSON.}
+    \label{fig:jsonclient}
+\end{figure}
+Dozwolone rządania, wraz z opisem i wymaganym obiektem zostały przedstawione w tabeli \ref{tab:clientmessagestypes}
+
+\begin{table}[h]
+  \centering
+  \begin{tabular}{ |p{1.5cm}|p{6cm}|p{6cm}| }
+    \hline
+    \textbf{Typ wiadomości} & \textbf{Opis} & \textbf{Rodzaj obiektu} \\ \hline
+    login & Próba zalogowania użytkownika & Obiekt przesyłający nazwe użytkownika oraz skrót SHA1 jego hasła. \\
+    create & Utwórz kanał gry & Obiekt podobny do obiektu \emph{channel}. Z wymaganymi polami \emph{name} i {capacity} oraz opcjonalnym polem \emph{password}. \\
+    register & Zarejestrowanie użytkownika & Tożsame z wiadomością typu login \\
+    join & Dołącz do rozgrywki & Obiekt zawierający nazwę porządanego kanału \\
+    event & Wydarzenie jakie zostało wygenerowane przez użytkownika & Typ wydarzenia, np. nacisnięcie lewej strzałki, spacji itp. \\
+    list & Wylistuj wszystkie dostępne kanały na serwerze & ignorowane \\
+    logout & Wylogowanie użytkownika & ignorowane \\
+    \hline
+  \end{tabular}
+  \caption{Przydział prac poszczególnym członkom zespołu}
+  \label{tab:clientmessagestypes}
+\end{table}
+\subsubsection{Wiadomość serwera}
+Wiadomości serwera można podzielić na dwie grupy:
+\begin{itemize}
+  \item Odpowiedzi na rządania.
+  \item Cyklicznie rozyłany stan rozgrywki (do wszystkich użytkowników na danym kanale).
+\end{itemize}
+
+Odpowiedź na rządanie ma format tożsamy z formatem wiadomości klienta z tym, że pole \emph{messageType} może przyjąć jedną z dwóch wartości \emph{ok} lub \emph{error} a pole \emph{uid} jest nieobecne. W przypadku \emph{ok}, pole \emph{payload} niesie wartość wyniku rządania klienta. Jeżeli pole \emph{messageType} ma wartość \emph{error} serwer, pole \emph{payload} zawiera obiekt przedstawiony na rysunku \ref{fig:errors}
+\begin{figure}[ht]
+    \centering
+    \begin{verbatim}
+      {
+        errorCode : <<Numer>>,
+        errorDescription : <<Opis błędu>>
+      }
+      \end{verbatim}
+    \caption{Reprezentacja obiektu zapytania klienta w notacji JSON.}
+    \label{fig:errors}
+\end{figure}
+
+Stan rozysłany do użytkowników zawiera następujące pola, opisane w tabeli \ref{tab:state-fields}.
+
+\begin{table}[ht]
+  \centering
+  \begin{tabular}{ |p{3cm}|p{8cm}| }
+    \hline
+    \textbf{Nazwa pola} & \textbf{Opis} \\ \hline
+    \emph{players} & Lista użytkowników na kanale, łącznie z ich pozycją, rotacją i przynależnością do drużyny \\
+    \emph{scoreYellow} & Punky drużyny żółtej \\
+    \emph{scoreBlue} & Punky drużyny niebieskiej \\
+    \emph{ballInstance} & Pozycja piłki \\
+    \hline
+  \end{tabular}
+  \caption{Przydział prac poszczególnym członkom zespołu}
+  \label{tab:state-fields}
+\end{table}
 
 \subsection{Cześć serwerowa}
 Implementacja serwera, za sprawą wykorzystania języka Common Lisp została zaprogramowana korzystając z dwóch paradygmatów programowania. Funkcyjnym, za sprawą natury języka Lisp i obiektowym, za sprawą CLOS\footnote{\url{https://en.wikipedia.org/wiki/Common_Lisp_Object_System}}.
