@@ -92,6 +92,12 @@
          (balli (ball-instance-of channel))
          (score (score-of channel))
          (goalp nil))
+    (if (or (= (car score) *round-score*) (= (cdr score) *round-score*))
+        (progn
+          (setf (position-of balli) '(:x 350 :y 175))
+          (setf (v-of balli) 0)
+          (setf score (cons 0 0))
+          (setf (score-of channel) score)))
     (when (check-for-score (ball-instance-of channel) channel)
       (setf (position-of balli) '(:x 350 :y 175))
       (setf (v-of balli) 0)
@@ -195,7 +201,8 @@
     (with-lock-held (lock)
       (log-as :info "removing user ~A of uid ~A" user (uid-of user))
       (remhash (uid-of user) (users-of channel))
-      (decf (players-count-of channel)))))
+      (if (> (players-count-of channel) 0)
+          (decf (players-count-of channel))))))
 
 (defun leave-server (user)
   (with-slots ((ch channel)) user

@@ -46,6 +46,7 @@
 (defparameter *height* 350)
 (defparameter *rate* 1/26)
 (defparameter *ball-radius* 22)
+(defparameter *round-score* 5)
 (defparameter *kick-offset* 2)
 (defparameter *player-radius* 22)
 (defparameter *new-uid* (let ((uuid (random-string)))

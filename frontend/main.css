@@ -7,6 +7,15 @@ body
     background-attachment:fixed;
     background-position: right;
 }
+#leave
+{
+    margin-bottom: 15px;
+}
+
+#logout
+{
+    margin-top: 20px;
+}
 
 #registrationBox
 {
