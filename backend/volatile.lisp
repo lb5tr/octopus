@@ -56,6 +56,7 @@
 
 (def class* game-state ()
   ((players)
+   (messeges nil)
    (score-yellow 0)
    (score-blue 0)
    (ball-instance :type ball)))

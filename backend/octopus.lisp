@@ -84,23 +84,25 @@
               vel 0))))
 
 (defun generate-new-state (channel)
-  (when (check-for-score (ball-instance-of channel) channel)
-    (reset-positions channel))
   (let* ((users (users-of channel))
          (users-list (loop for user being the hash-values in users collect user))
          (users-positions nil)
          (balli (ball-instance-of channel))
-         (score (score-of channel)))
+         (score (score-of channel))
+         (goalp nil))
          (collision-between (ball-instance-of channel) users-list)
         (maphash (lambda (x y) (collision-between y `(,balli) :mangle-first nil)) users)
       ;  (mapcar (lambda (x) (collision-between x users-list)) users-list)
-    (setf (ball-instance-of channel) (next-position balli users-list))
-    (setf users-positions (loop for user being the hash-values in users collect
-                               (progn
-                                 (setf (gethash (uid-of user)
-                                                (users-of channel)) (next-position user users-list))
-                                 `(:pos ,(position-of user) :rotation ,(direction-of user) :team ,(team-of user) :name ,(username-of user)))))
-    (make-instance 'game-state :players users-positions :ball-instance balli :score-yellow (car score) :score-blue (cdr score))))
+        (when (check-for-score (ball-instance-of channel) channel)
+          (reset-positions channel)
+          (setf goalp t))
+        (setf (ball-instance-of channel) (next-position balli users-list))
+        (setf users-positions (loop for user being the hash-values in users collect
+                                   (progn
+                                     (setf (gethash (uid-of user)
+                                                    (users-of channel)) (next-position user users-list))
+                                     `(:pos ,(position-of user) :rotation ,(direction-of user) :team ,(team-of user) :name ,(username-of user)))))
+        (make-instance 'game-state :messeges (list goalp) :players users-positions :ball-instance balli :score-yellow (car score) :score-blue (cdr score))))
 
 (defun make-state-broadcast (chan)
   (lambda ()

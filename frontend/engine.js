@@ -59,9 +59,15 @@ function PlayState() {
             //     score_sound.play();
             //     lastYellowScore++;
             // }
+
+            if (currentState.messeges[0])
+            {
+                score_sound.play();
+            }
+
             $('#bluePlayers').html('');
             $('#yellowPlayers').html('');
-            $('#score').html("<h3>" + lastBlueScore + ' : ' +lastYellowScore + "</h3>");
+            $('#score').html("<h3>" + currentState.scoreBlue + ' : ' +currentState.scoreYellow + "</h3>");
             for (var i=0;i<currentState.players.length; i++)
             {
                 sprt = new jaws.Sprite({image: 'player-'+currentState.players[i][5]+'.png', x: currentState.players[i][1][1], y:currentState.players[i][1][3], anchor: "center"});
