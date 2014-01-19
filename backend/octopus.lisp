@@ -206,6 +206,11 @@
           (leave-channel user))
       (leave-server  user))))
 
+(def auth-handler leave (dummy uid client)
+  (let ((user (get-user *server* uid :users-by 'users-by-uid-of)))
+    (leave-channel user))
+  '(:message-type :ok))
+
 (def auth-handler join-channel (channel-data uid client)
   (let* ((user (get-user *server* uid :users-by 'users-by-uid-of))
          (channel-name (name-of channel-data))
@@ -306,7 +311,7 @@
 (defparameter *message-type-alist*
   '(("undefined" . undefined-command)
     ("login" . login)
-    ("logout" . logout)
+    ("leave" . leave)
     ("register" . register)
     ("list" . list-channels)
     ("create" . create-channel)
@@ -317,7 +322,7 @@
 ;;message to payload type
 (defparameter *message-payload-alist*
   '((login . user-v)
-    (logout . dummy)
+    (leave . dummy)
     (register . user-v)
     (undefined-command . dummy)
     (list-channels . dummy)

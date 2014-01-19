@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,7 +9,6 @@
     <title>Simple</title>
   </head>
   <body>
-
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
     <script src="http://crypto-js.googlecode.com/svn/tags/3.0.2/build/rollups/sha1.js"></script>
     <script src="http://jawsjs.com/jawsjs/jaws-dynamic.js"></script>
@@ -17,6 +17,9 @@
     <div id="game" style="display:none;">
       <h1 id="channelName"></h1>
       <h2 id="score"></h2>
+      <div class="btn-group">
+        <button type="button" id="leave" class="btn btn-default">Leave game</button>
+      </div>
       <canvas width="700" height="350" id="canvas"></canvas>
       <div id="playersAtChannel" style="width:700px;">
         <div id="playersYellow" class="listContainer">

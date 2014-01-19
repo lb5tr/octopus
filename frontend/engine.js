@@ -48,17 +48,17 @@ function PlayState() {
                 firstRun = false;
             }
 
-            if (lastBlueScore != currentState.scoreBlue)
-            {
-                score_sound.play();
-                lastBlueScore++;
-            }
+            // if (lastBlueScore != currentState.scoreBlue)
+            // {
+            //     score_sound.play();
+            //     lastBlueScore++;
+            // }
 
-            if (lastYellowScore != currentState.scoreYellow)
-            {
-                score_sound.play();
-                lastYellowScore++;
-            }
+            // if (lastYellowScore != currentState.scoreYellow)
+            // {
+            //     score_sound.play();
+            //     lastYellowScore++;
+            // }
             $('#bluePlayers').html('');
             $('#yellowPlayers').html('');
             $('#score').html("<h3>" + lastBlueScore + ' : ' +lastYellowScore + "</h3>");

@@ -23,6 +23,10 @@ $(document).ready(function ( ) {
         showRegisterBox();
     });
 
+    $('#leave').click( function () {
+        leaveChannel();
+    });
+
     $('#register').click (function () {
         register();
     });
@@ -45,6 +49,25 @@ $(document).ready(function ( ) {
     $("#loginBox").fadeIn();
     initWebSockets();
 });
+
+function leaveChannel()
+{
+    lastWas = "leaveChannel";
+    msg = {
+        messageType : "leave",
+        uid : UID,
+        payload : {}
+    }
+
+    socket.send(JSON.stringify(msg));
+}
+
+function afterLeaveChannel(obj)
+{
+    $("#game").css('display','none');
+
+    $("#menu").fadeIn();
+}
 
 function register()
 {
@@ -171,6 +194,7 @@ function dispatch (data)
         case "login": afterLogin(obj.payload);break;
         case "createChannel": afterCreate(obj.payload);break;
         case "logout": afterLogout(obj.payload); break;
+        case "leaveChannel": afterLeaveChannel(obj.payload); break;
         case "listChannels": afterList(obj.payload); break;
         case "joinChannel": afterJoinChannel(obj.payload); break;
         case "sendEvent": afterSendEvent(obj.payload); break;
