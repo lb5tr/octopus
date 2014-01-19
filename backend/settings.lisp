@@ -44,7 +44,7 @@
 (defparameter *default-digest* 'sha1)
 (defparameter *width* 700)
 (defparameter *height* 350)
-(defparameter *rate* 1/30)
+(defparameter *rate* 1/26)
 (defparameter *ball-radius* 22)
 (defparameter *kick-offset* 2)
 (defparameter *player-radius* 22)

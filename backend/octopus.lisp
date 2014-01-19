@@ -78,7 +78,9 @@
 
 (defun reset-positions (channel)
   (with-slots ((bi ball-instance) (us users)) channel
-    (maphash (lambda (key user) (setf (position-of user) (starting-postion-of user))) us)
+    (maphash (lambda (key user) (setf (position-of user) '(:x 175 :y 75)
+                                      (direction-of user) '(:x 1 :y 0)
+                                      (v-of user) 0)) us)
     (with-slots ((pos position) (vel v)) bi
         (setf pos '(:x 350 :y 175)
               vel 0))))
@@ -90,19 +92,21 @@
          (balli (ball-instance-of channel))
          (score (score-of channel))
          (goalp nil))
-         (collision-between (ball-instance-of channel) users-list)
-        (maphash (lambda (x y) (collision-between y `(,balli) :mangle-first nil)) users)
-      ;  (mapcar (lambda (x) (collision-between x users-list)) users-list)
-        (when (check-for-score (ball-instance-of channel) channel)
-          (reset-positions channel)
-          (setf goalp t))
-        (setf (ball-instance-of channel) (next-position balli users-list))
-        (setf users-positions (loop for user being the hash-values in users collect
-                                   (progn
-                                     (setf (gethash (uid-of user)
-                                                    (users-of channel)) (next-position user users-list))
-                                     `(:pos ,(position-of user) :rotation ,(direction-of user) :team ,(team-of user) :name ,(username-of user)))))
-        (make-instance 'game-state :messeges (list goalp) :players users-positions :ball-instance balli :score-yellow (car score) :score-blue (cdr score))))
+    (when (check-for-score (ball-instance-of channel) channel)
+      (setf (position-of balli) '(:x 350 :y 175))
+      (setf (v-of balli) 0)
+      (setf goalp t)
+      (mapcar (lambda (user)
+                (setf (v-of user) 0)) users-list))
+    (collision-between (ball-instance-of channel) users-list)
+    (maphash (lambda (x y) (collision-between y `(,balli) :mangle-first nil)) users)
+    (setf (ball-instance-of channel) (next-position balli users-list))
+    (setf users-positions (loop for user being the hash-values in users collect
+                               (progn
+                                 (setf (gethash (uid-of user)
+                                                (users-of channel)) (next-position user users-list))
+                                 `(:pos ,(position-of user) :rotation ,(direction-of user) :team ,(team-of user) :name ,(username-of user)))))
+    (make-instance 'game-state :messeges (list goalp) :players users-positions :ball-instance balli :score-yellow (car score) :score-blue (cdr score))))
 
 (defun make-state-broadcast (chan)
   (lambda ()

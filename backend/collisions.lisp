@@ -77,7 +77,7 @@
          (direction (direction-of ball))
          (nx (+ (* (getf direction :x) v) x))
          (ny (abs (mod (+ (* (getf direction :y) v) y) 350))))
-    (if (> (abs v) 0.01)
+    (if (> (abs v) 0.1)
         (progn
           (if (> v 0) (setf (v-of ball) (- v 0.09)))
           (if (< v 0) (setf (v-of ball) (+ v 0.09)))
