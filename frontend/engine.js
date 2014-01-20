@@ -1,5 +1,4 @@
 
-gameSocket = null
 currentState = null
 player = null;
 
@@ -140,13 +139,12 @@ function MenuState() {
 }
 
 function stateUpdate(data) {
-    currrentState = JSON.parse(data);
+    currentState = JSON.parse(data);
 }
 
-function startGame(socket) {
-    gameSocket = socket;
+function startGame() {
 
-    socket.onmessage = function (msg) { stateUpdate(msg.data); };
+//    socket.onmessage = function (msg) { stateUpdate(msg.data); };
     score_sound = new Audio("score.mp3");
     score_sound.play();
     jaws.assets.add("plane.png");

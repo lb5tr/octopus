@@ -121,6 +121,7 @@
            (let ((state (generate-new-state chan))
                  (users (users-of chan)))
              (loop for user being the hash-values in users do
+;                  (log-as info "pushing state to ~A" (username-of user))
                   (write-to-client-text (socket-of user) (response-with
                                                           :message-type :state
                                                           :payload state)))))
@@ -150,7 +151,8 @@
 
 (def auth-handler create-channel (channel-data uid client)
   (let ((channel-name (name-of channel-data))
-        (password (password-hash-of channel-data)))
+        (password (password-hash-of channel-data))
+        (cap (parse-integer (capacity-of channel-data) :junk-allowed t)))
     (multiple-value-bind (ret code) (ensure-proper-channel channel-data)
       (if ret
           (progn
@@ -158,13 +160,15 @@
                   (channel-locator-of channel-data) channel-name)
             (unless (emptyp password)
               (setf (protected-of channel-data) t))
+            (when (or (null cap) (> cap 6) (< cap 0))
+              (return-from handler '(:message-type :error :error-type invalid-capacity-value)))
 ;            (setf (listener-of channel-data) (start-ws-resource (concatenate 'string "/" channel-name)
  ;                                                               '("")
   ;                                                              'channel-resource
 ;                                                             channel-name)
             (setf
                   (state-broadcast-of channel-data) (make-thread (make-state-broadcast channel-data))
-                  (capacity-of channel-data) (parse-integer (capacity-of channel-data))
+                  (capacity-of channel-data) cap
                   (ball-instance-of channel-data) (make-instance 'ball))
             (add-channel *server* channel-name channel-data)
             `(:message-type :ok :payload ,channel-data))

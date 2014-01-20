@@ -1,21 +1,21 @@
 \section{Metodyka konstruowania systemu}
-Podczas pracy nad projektem starano się wykorzystać metody zwinne inżynieri oprogramowania. Interacja zazwyczaj była ustanawiana na jeden lub dwa tygodnie, po tym czasie dokładnie omawialiśmy zaimplementowane części systemu. Podczas spotkań naprzemnnie jedna połowa zespołu grała rolę klienta a druga rolę przedstawicieli firmy programistycznej.
+Podczas pracy nad projektem starano się wykorzystać metody zwinne inżynierii oprogramowania. Iteracja zazwyczaj była ustanawiana na jeden lub dwa tygodnie, po tym czasie dokładnie omawialiśmy zaimplementowane części systemu. Podczas spotkań naprzemiennie jedna połowa zespołu grała rolę klienta a druga rolę przedstawicieli firmy programistycznej.
 
-Niestety, z powodu na ograniczony czas nie mogliśmy w pełni zastowsować metody scrum. Spotkania dzienne odbywały się z różną częstotliwością, jednak zawsze utrzywaliśmy kontakt poprzez narzędzia pracy zespołowej. Kilkukrotnie starano się wykorzystać programowanie ekstremalne jednak efektywność pracy wzrosła nieznacznie.
+Niestety, z powodu na ograniczony czas nie mogliśmy w pełni zastosować metody scrum. Spotkania dzienne odbywały się z różną częstotliwością, jednak zawsze utrzymywaliśmy kontakt poprzez narzędzia pracy zespołowej. Kilkukrotnie starano się wykorzystać programowanie ekstremalne jednak efektywność pracy wzrosła nieznacznie.
 
-Wcześniej wspomniane narzędzedzia obejowały:
+Wcześniej wspomniane narzędzia obejmowały:
 \begin{itemize}
   \item Aplikację internetową Trello\footnote{\url{https://trello.com/}} -- jak główną platformę wymiany informacji, gromadzenia wiedzy oraz backlog.
   \item GitHub\footnote{\url{https://github.com/}} -- jako platformę wspólnej pracy nad kodem.
   \end{itemize}
 
-Podczas projektowania systemu nie wykorzystano żadnej techniki modelowania. Prace toczyły się na bieżąco i szczególy implementacji poszczególnych części były ustanawiane pomiędzy członkami za nie odpowiedzialnymi (\emph{frontend, backend}).
+Podczas projektowania systemu nie wykorzystano żadnej techniki modelowania. Prace toczyły się na bieżąco i szczegóły implementacji poszczególnych części były ustanawiane pomiędzy członkami za nie odpowiedzialnymi (\emph{frontend, backend}).
 
-Cześć serwerowa została zaimplementowana w jęzku Common Lisp w implementacji SBCL uruchamianej wyłącznie na platformie Linux. Wybór ten został podjęty ze względu na niską cenę i szeroką dostępność serwerów prywatnych wspierających tę rodzinę systemów.
+Cześć serwerowa została zaimplementowana w języku Common Lisp w implementacji SBCL uruchamianej wyłącznie na platformie Linux. Wybór ten został podjęty ze względu na niską cenę i szeroką dostępność serwerów prywatnych wspierających tę rodzinę systemów.
 
-Interfejs użytkownika to Aplikacja internetowa, zaimplemetowana w językach HTML, JavaScript oraz CSS, wybór ten padł z następujących względów:
+Interfejs użytkownika to Aplikacja internetowa, zaimplementowana w językach HTML, JavaScript oraz CSS, wybór ten padł z następujących względów:
 \begin{itemize}
   \item Niespotkana wcześniej łatwość przenoszenia kodu, zbliżona do maszyn wirtualnych.
-  \item Nowatorski sposób dystrybucji oprogramowania, klient nie musi nawet instalować programu na swoim systemie wystaczy nowoczesna przeglądarka i dostęp do internetu (lub sieci lokalnej w zależności od miejsca osadzenia (\emph{deployment}) aplikacji serwerowej).
-  \item Języki JavaScript, HTML oraz CSS perfekcyjnie uzupełniają się w kwestii tworzenia interfejsu użytkownika, HTML odpowiada za jego strukturę, JavaScript iterakcję a CSS wygląd.
+  \item Nowatorski sposób dystrybucji oprogramowania, klient nie musi nawet instalować programu na swoim systemie wystarczy nowoczesna przeglądarka i dostęp do internetu (lub sieci lokalnej w zależności od miejsca osadzenia (\emph{deployment}) aplikacji serwerowej).
+  \item Języki JavaScript, HTML oraz CSS perfekcyjnie uzupełniają się w kwestii tworzenia interfejsu użytkownika, HTML odpowiada za jego strukturę, JavaScript interakcję a CSS wygląd.
 \end{itemize}

@@ -188,7 +188,6 @@ function dispatch (data)
 
     if (obj.messageType == "ok")
     {
-        $("#log").html("Success!</br>");
         switch (lastWas)
         {
         case "login": afterLogin(obj.payload);break;
@@ -201,10 +200,8 @@ function dispatch (data)
         case "register": afterRegister(obj.payload); break;
         };
     }
-    else
-        if (obj.messageType == "state")
+    else if (obj.messageType == "state")
     {
-        console.log("state!!");
         currentState = obj.payload;
     }
     else
@@ -236,11 +233,11 @@ function afterJoinChannel(channel)
         $("#dialog").slideUp();
     }
     console.log(channel.channelLocator);
-    var gameSocket = connectChannel(channel.channelLocator);
+
     $("#channelName").html('Channel: ' + channel.name);
     hideMenu();
     showGame();
-    startGame(gameSocket);
+    startGame();
 }
 
 function afterLogout(p)

@@ -77,7 +77,6 @@
    (password-hash nil :type string)
    (protected nil)
    (creation-time (get-universal-time) :type date)
-   (listener nil)
    (state-broadcast nil)
    (lock (make-lock)))
   (:metaclass selective-serialization-class)
@@ -138,20 +137,3 @@
   (log-as info "got binary frame len: ~s" (length message) client)
   (write-to-client-binary client message))
 
-;;channel handlers
-(def class* channel-resource (ws-resource)
-  ())
-
-(defmethod resource-client-connected ((res channel-resource) client)
-  (log-as info "client connected on channel from ~s : ~s" (client-host client) (client-port client))
-  t)
-
-(defmethod resource-client-disconnected ((resource channel-resource) client)
-  (log-as info "client disconnected from resource ~A" resource))
-
-(defmethod resource-received-text ((res channel-resource) client message)
-  (log-as info "got frame ~s... from client ~s" message client)
-  (write-to-client-text client (dispatch-message (json-to-client-message message) :client client)))
-
-(defmethod resource-received-binary((res channel-resource) client message)
-  (log-as info "got binary frame len: ~s" (length message) client))

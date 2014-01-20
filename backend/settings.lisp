@@ -38,7 +38,8 @@
     (full-channel . 9)
     (wrong-password . 10)
     (username-taken . 11)
-    (username-and-password-cannot-be-empty . 12)))
+    (username-and-password-cannot-be-empty . 12)
+    (invalid-capacity-value . 13)))
 
 ;others
 (defparameter *default-digest* 'sha1)
